@@ -20,11 +20,12 @@ Easy to extend and contribute to.
   - User can add their own integrator
 6. Contains an implementation of the energy 
    equation
-  - Formulated in terms of the temperature of 
-    the mixture
+  - Formulated in terms of the temperature of the mixture
 7. Flexible visualizations 
 8. Consistency checks on units
 9. Reactions specified through .xml input file.
+10. Derivatives wrt state.
+  - Try to use automatic differentiation packages?
 
 ## Milestones
 * March 1
