@@ -38,7 +38,7 @@ Easy to extend and contribute to.
     - Time plots of various quantities
     - Graphical viz?
   - First pass at database
-    - NASA polynomials for Burcat's database 
+    - NASA polynomials for [Burcat's database](http://garfield.chem.elte.hu/Burcat/burcat.html)
     - Molecular weights
 * April 1
   - Energy equation
