@@ -4,7 +4,7 @@ A chemical kinetics library written in `Python`.
 
 Easy to extend and contribute to.
 
-List of capabilities:
+## List of capabilities:
 1. Elementary reactions
 2. Some non-elementary reactions
   - Duplicate
@@ -23,3 +23,29 @@ List of capabilities:
   - Formulated in terms of the temperature of 
     the mixture
 7. Flexible visualizations 
+8. Consistency checks on units
+9. Reactions specified through .xml input file.
+
+## Milestones
+* March 1
+  - Elementary reactions
+  - Reversible and irreversible reactions
+  - Consistency checks on units
+  - Input parsers
+  - Time integration module
+  - Visualizations
+    - Time plots of various quantities
+    - Graphical viz?
+  - First pass at database
+    - NASA polynomials for Burcat's database 
+    - Molecular weights
+* April 1
+  - Energy equation
+  - Non-elementary reactions
+  - Host database on external site?
+  - Web API for database?
+* May 1
+  - Accessing database
+  - Contributing to database
+  - Requests?
+  - Derivative information
