@@ -1,5 +1,7 @@
 # pychemkin
 
+[![Build Status](https://travis-ci.org/dsondak/pychemkin.svg?branch=master)](https://travis-ci.org/dsondak/pychemkin.svg?branch=master)
+
 A chemical kinetics library written in `Python`.  
 
 Easy to extend and contribute to.
