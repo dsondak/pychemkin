@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 # This reads the __version__ variable from pychemkin/_version.py
 exec(open('src/pychemkin/_version.py').read())
 
-# README file as long_description:
+# Get the long description from the README file
 long_description = open('README.md').read()
 
 # Read in requirements.txt
@@ -15,7 +15,8 @@ requirements = [r.strip() for r in requirements]
 setup(
     name='pychemkin',
     version=__version__,
-    description='Chemical kinetics code',
+    description='Chemical kinetics library',
+    keywords='chemical kinetics',
     long_description=long_description,
     install_requires=requirements,
     url='https://github.com/dsondak/pychemkin',
@@ -28,5 +29,6 @@ setup(
     package_data={
         '': [os.path.join('src', 'pychemkin', 'xml_files', '*.xml'),
              os.path.join('src', 'pychemkin', 'thermo_data', '*.sqlite')]
-    }
+    },
+    test_suite='tests'
     )
