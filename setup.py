@@ -22,7 +22,7 @@ setup(
     author='PyChemKin Developers',
     author_email='hsim13372@gmail.com',
     license='MIT',
-    packages=find_packages(where='src') + find_packages(where='tests'),
+    packages=find_packages(where='src'),
     package_dir={'': 'src'},
     include_package_data=True,
     package_data={
