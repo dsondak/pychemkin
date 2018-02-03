@@ -3,20 +3,14 @@
 
 import pytest
 
-import sys
-sys.path.append('../pychemkin/preprocessing')
-sys.path.append('../pychemkin')
-
-from Parser import RxnType, XmlParser
-from pychemkin_errors import pychemkinError
-from pychemkin import pkg_xml_path
-# from pychemkin.chemkin_errors import ChemKinError
-# from pychemkin.preprocessing.parse_xml import RxnType, XmlParser
+from pychemkin.config import pkg_xml_path
+from pychemkin.preprocessing import Parser
+from pychemkin.pychemkin_errors import PyChemKinError
 
 
 def test_parse_basic_functionality():
     """Tests attributes of XML file are parsed correctly."""
-    xml = XmlParser(pkg_xml_path('rxns_ideal.xml'))
+    xml = Parser.XmlParser(pkg_xml_path('rxns_ideal.xml'))
     species, rxns = xml.load()
 
     # Correct number of reactions returned.
@@ -33,13 +27,13 @@ def test_parse_basic_functionality():
     assert rxns[1].rxn_id == 'reaction02', err_msg
 
     err_msg = 'type attribute not parsed properly.'
-    assert rxns[0].type == RxnType.Elementary, err_msg
-    assert rxns[1].type == RxnType.Elementary, err_msg
+    assert rxns[0].type == Parser.RxnType.Elementary, err_msg
+    assert rxns[1].type == Parser.RxnType.Elementary, err_msg
 
 
 def test_parse_reactants_products():
     """Tests parsing of reactants and products."""
-    xml = XmlParser(pkg_xml_path('rxns_ideal.xml'))
+    xml = Parser.XmlParser(pkg_xml_path('rxns_ideal.xml'))
     species, rxns = xml.load()
 
     err_msg = 'reactants not parsed correctly.'
@@ -53,7 +47,7 @@ def test_parse_reactants_products():
 
 def test_parse_rxn_coeff():
     """Tests parsing of reaction rate coefficients."""
-    xml = XmlParser(pkg_xml_path('rxns.xml'))
+    xml = Parser.XmlParser(pkg_xml_path('rxns.xml'))
     species, rxns = xml.load()
 
     rxn1_coeff = rxns[0].rate_coeff
@@ -75,7 +69,7 @@ def test_parse_rxn_coeff():
 
 def test_rxndata_equation():
     """Tests equation representation of RxnData."""
-    xml = XmlParser(pkg_xml_path('rxns_ideal.xml'))
+    xml = Parser.XmlParser(pkg_xml_path('rxns_ideal.xml'))
     species, rxns = xml.load()
 
     err_msg = 'get_equation() method result different than expected.'
@@ -91,11 +85,11 @@ def test_badparse_negative_A_arr():
     """Tests for case when Arrhenius coefficient component A for a
     reaction is negative.
     """
-    xml = XmlParser(pkg_xml_path('rxns_neg_A_2'))
+    xml = Parser.XmlParser(pkg_xml_path('rxns_neg_A_2'))
     try:
         rxns = xml.load()
-    except pychemkinError as err:
-        assert type(err) == pychemkinError
+    except PyChemKinError as err:
+        assert type(err) == PyChemKinError
         assert str(err).find(
               'A coeff < 0 in reaction with id = reaction02') != -1
 
@@ -104,10 +98,10 @@ def test_badparse_negative_A_modarr():
     """Tests for case when modified Arrhenius coefficient component
     A for a reaction is negative.
     """
-    xml = XmlParser(pkg_xml_path('rxns_neg_A'))
+    xml = Parser.XmlParser(pkg_xml_path('rxns_neg_A'))
     try:
         rxns = xml.load()
-    except pychemkinError as err:
-        assert type(err) == pychemkinError
+    except PyChemKinError as err:
+        assert type(err) == PyChemKinError
         assert str(err).find(
               'A coeff < 0 in reaction with id = reaction01') != -1

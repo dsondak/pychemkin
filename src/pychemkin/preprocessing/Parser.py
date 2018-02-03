@@ -4,11 +4,7 @@
 from enum import Enum
 import numpy
 import xml.etree.ElementTree as ET
-
-# TODO: temporary while package is in development
-import sys
-sys.path.append('../')
-from pychemkin_errors import pychemkinError
+from pychemkin.pychemkin_errors import PyChemKinError
 
 
 class RxnType(Enum):
@@ -72,7 +68,7 @@ class XmlParser():
 
         Notes:
         ------
-            - Raises pychemkinError for invalid attribute/element values
+            - Raises PyChemKinError for invalid attribute/element values
         """
         rxn_data = RxnData()
         rxn_data.rxn_id = rxn.get('id')
@@ -84,7 +80,7 @@ class XmlParser():
         elif reversible in ['yes', 'y', 'true', 't']:
             rxn_data.is_reversible = True
         else:
-            raise pychemkinError(
+            raise PyChemKinError(
                   'XmlParser.load()',
                   'Invalid reversibility attribute in reaction {}'.format(
                         result.rxn_id))
@@ -94,7 +90,7 @@ class XmlParser():
         if rnx_type == 'elementary':
             rxn_data.type = RxnType.Elementary
         else:
-            raise pychemkinError(
+            raise PyChemKinError(
                   'XmlParser.load()',
                   'Reaction {} is non-elementary.'.format(
                         rxn_data.rxn_id))
@@ -102,7 +98,7 @@ class XmlParser():
         # Get info about rxn rate coefficient
         rate_coeff = rxn.find('rateCoeff')
         if rate_coeff is None:
-            raise pychemkinError(
+            raise PyChemKinError(
                     'XmlParser.load()',
                     'No <rateCoeff> element found in one of the '
                     'reactions.')
@@ -111,7 +107,7 @@ class XmlParser():
             arrhenius = rate_coeff.find('Arrhenius')
             A = float(arrhenius.find('A').text.strip())
             if A < 0:
-                raise pychemkinError(
+                raise PyChemKinError(
                         'XmlParser.load()',
                         'A coeff < 0 in reaction with '
                         'id = {}'.format(rxn_data.rxn_id))
@@ -122,7 +118,7 @@ class XmlParser():
             mod_arrhenius = rate_coeff.find('modifiedArrhenius')
             A = float(mod_arrhenius.find('A').text.strip())
             if A < 0:
-                raise pychemkinError(
+                raise PyChemKinError(
                       'A coeff < 0 in reaction with id = {}'.format(
                             rxn_data.rxn_id))
             b = float(mod_arrhenius.find('b').text.strip())
@@ -134,7 +130,7 @@ class XmlParser():
             rxn_data.rate_coeff = float(const.find('k').text.strip())
 
         else:
-            raise pychemkinError(
+            raise PyChemKinError(
                     'XmlParser.load()',
                     'No recognized child of <rateCoeff> found '
                     'from which to parse coefficients.')
@@ -224,7 +220,7 @@ class XmlParser():
             for rxn_data in rxn_data_list:
 
                 if rxn_data.type != RxnType.Elementary:
-                    raise pychemkinError(
+                    raise PyChemKinError(
                             'XmlParser.populate_parsed_data_list(Ti)',
                             'Non-elementary reactions cannot be '
                             'parsed now.')
@@ -288,7 +284,7 @@ class XmlParser():
                         is_reversible_list,
                         sys_vi_r, sys_vi_p).get_backward_coefs()
                 parsed_data_dict['b_ki'] = b_ki
-            except pychemkinError as err:
+            except PyChemKinError as err:
                 parsed_data_dict['b_ki'] = 'Not Defined'
 
             parsed_data_dict_list.append(parsed_data_dict)

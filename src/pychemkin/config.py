@@ -1,8 +1,8 @@
+
 import os
 
 # Define path to XML files based on relative position to this module.
 _PATH_XML_FILES = os.path.join(os.path.dirname(__file__), 'xml_files/')
-
 
 def pkg_xml_path(file_name):
     """Creates full path to XML file located in xml_files directory."""

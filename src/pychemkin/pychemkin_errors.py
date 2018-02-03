@@ -1,10 +1,11 @@
 
-"""Class for pychemkin errors."""
+"""Class for PyChemkin-related errors."""
 
-class pychemkinError(Exception):
+
+class PyChemKinError(Exception):
     """Encapsulates errors encountered in this package."""
     def __init__(self, method, info=None):
-        """Initializes pychemkin-related error.
+        """Initializes PyChemkin-related error.
 
         Args:
         -----
