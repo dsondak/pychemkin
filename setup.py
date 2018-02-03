@@ -3,7 +3,7 @@ import os
 from setuptools import setup, find_packages
 
 # This reads the __version__ variable from pychemkin/_version.py
-exec(open('src/pychemkin/_version.py').read())
+exec(open('pychemkin/_version.py').read())
 
 # Get the long description from the README file
 long_description = open('README.md').read()
@@ -23,12 +23,10 @@ setup(
     author='PyChemKin Developers',
     author_email='hsim13372@gmail.com',
     license='MIT',
-    packages=find_packages(where='src'),
-    package_dir={'': 'src'},
+    packages=['pychemkin'],
+    test_suite='tests',
     include_package_data=True,
     package_data={
-        '': [os.path.join('src', 'pychemkin', 'xml_files', '*.xml'),
-             os.path.join('src', 'pychemkin', 'thermo_data', '*.sqlite')]
-    },
-    test_suite='tests'
+        'pychemkin': [os.path.join('pychemkin', 'thermo_data', '*.sqlite')]
+    }
     )

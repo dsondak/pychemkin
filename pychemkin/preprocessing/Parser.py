@@ -11,7 +11,7 @@ class RxnType(Enum):
     Elementary = 1
 
 
-class XmlParser():
+class XmlParser:
     """Class for parsing input XML files to retrieve and
     preprocess reaction data.
     """
@@ -292,7 +292,7 @@ class XmlParser():
         return parsed_data_dict_list
 
 
-class RxnData():
+class RxnData:
     """Class for storing reaction data.
 
     Attributes:
