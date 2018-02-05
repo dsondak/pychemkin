@@ -42,28 +42,6 @@ class BaseReaction:
     reaction_rate : 
 
     """
-    # FINISH!!!!!!! 
-
-
-# TODO: FINISH!
-    def __str__(self):
-        """Returns user-friendly representation of reaction.
-        
-        Returns:
-        --------
-        rxn_info : str
-            string representation of reaction (reaction equation)
-        """
-        rxn_info = ''
-        #"Reaction Information: \n{0}\n{1}\n".format(self.rxn_equation, )
-        return rxn_info
-
-# TODO: FINISH!
-    def __repr__ (self):
-
-        rxn_repr = 'ReactionBase(rxn_type)'
-        return rxn_repr
-
     def __len__(self):
         """Returns number of chemical species in reaction.
         

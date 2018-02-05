@@ -8,38 +8,39 @@ from pychemkin.pychemkin_errors import PyChemKinError
 
 
 class RxnType(Enum):
+    """Class for enumerating reaction types."""
     Elementary = 1
+    Nonelementary = 2
 
 
-class XmlParser:
-    """Class for parsing input XML files to retrieve and
+class XMLParser:
+    """Parser for input XML files to retrieve and
     preprocess reaction data.
     """
-    def __init__(self, path):
+    def __init__(self, filename):
         """Initializes XML file parser.
 
         Args:
-        -----
-        path : str
-            file path of input XML file
+        =====
+        filename : str, required
+            name of input XML file
         """
-
-        if path[-4:] != '.xml':
-            path += '.xml'
-        self.path = path
+        if filename[-4:] != '.xml':
+            filename += '.xml'
+        self.filename = filename
 
     def load(self):
         """Parses XML file contents and loads into lists of species and
         RxnData objects representing reactions in the file.
 
         Returns:
-        --------
+        ========
         species : list[str]
             list of names of species involved in system of reactions
         list_RxnData : list[RxnData]
             list of RxnData objects, each representing a reaction
         """
-        tree = ET.parse(self.path)
+        tree = ET.parse(self.filename)
         root = tree.getroot()
 
         species = []
@@ -53,21 +54,23 @@ class XmlParser:
             list_RxnData.append(rxn_data)
         return species, list_RxnData
 
+
+### TODO: break this up into smaller functions?
     def __extract_data_from_reaction_element(self, rxn):
         """Returns RxnData object containing data from <reaction> XML element.
 
         Args:
-        -----
-        rxn : xml.etree.ElementTree.Element
+        =====
+        rxn : xml.etree.ElementTree.Element, required
             <reaction> XML element containing information about a reaction
 
         Returns:
-        --------
+        ========
         rxn_data : RxnData
             RxnData object containing information from input, rxn
 
         Notes:
-        ------
+        ======
             - Raises PyChemKinError for invalid attribute/element values
         """
         rxn_data = RxnData()
@@ -81,7 +84,7 @@ class XmlParser:
             rxn_data.is_reversible = True
         else:
             raise PyChemKinError(
-                  'XmlParser.load()',
+                  'XMLParser.load()',
                   'Invalid reversibility attribute in reaction {}'.format(
                         result.rxn_id))
 
@@ -91,7 +94,7 @@ class XmlParser:
             rxn_data.type = RxnType.Elementary
         else:
             raise PyChemKinError(
-                  'XmlParser.load()',
+                  'XMLParser.load()',
                   'Reaction {} is non-elementary.'.format(
                         rxn_data.rxn_id))
 
@@ -99,7 +102,7 @@ class XmlParser:
         rate_coeff = rxn.find('rateCoeff')
         if rate_coeff is None:
             raise PyChemKinError(
-                    'XmlParser.load()',
+                    'XMLParser.load()',
                     'No <rateCoeff> element found in one of the '
                     'reactions.')
 
@@ -108,7 +111,7 @@ class XmlParser:
             A = float(arrhenius.find('A').text.strip())
             if A < 0:
                 raise PyChemKinError(
-                        'XmlParser.load()',
+                        'XMLParser.load()',
                         'A coeff < 0 in reaction with '
                         'id = {}'.format(rxn_data.rxn_id))
             E = float(arrhenius.find('E').text.strip())
@@ -131,7 +134,7 @@ class XmlParser:
 
         else:
             raise PyChemKinError(
-                    'XmlParser.load()',
+                    'XMLParser.load()',
                     'No recognized child of <rateCoeff> found '
                     'from which to parse coefficients.')
 
@@ -149,12 +152,12 @@ class XmlParser:
         stoichiometric coefficients.
 
         Args:
-        -----
-        tag : xml.etree.ElementTree.Element
+        =====
+        tag : xml.etree.ElementTree.Element, required
             <reactants> or <products> XML element
 
         Returns:
-        --------
+        ========
         species_info_dict : dict
             dictionary mapping species to stoichiometric coefficients
         """
@@ -173,17 +176,17 @@ class XmlParser:
         reaction parameters at a given temperature.
 
         Args:
-        -----
-        Ti : list[float]
+        =====
+        Ti : list[float], required
             Reaction temperatures, in Kelvin
 
         Returns:
-        --------
+        ========
         parsed_data_dict_list: list[dict]
             List of dictionaries containing reaction parameters
 
         Notes:
-        ------
+        ======
             - Returns a list of dictionaries, each with following attributes:
                 parsed_data_dict['species'] : a list of reaction species
                 parsed_data_dict['ki'] : a list of reaction rate coefficients,
@@ -221,7 +224,7 @@ class XmlParser:
 
                 if rxn_data.type != RxnType.Elementary:
                     raise PyChemKinError(
-                            'XmlParser.populate_parsed_data_list(Ti)',
+                            'XMLParser.populate_parsed_data_list(Ti)',
                             'Non-elementary reactions cannot be '
                             'parsed now.')
 
@@ -293,10 +296,10 @@ class XmlParser:
 
 
 class RxnData:
-    """Class for storing reaction data.
+    """Class for storing data for a single reaction.
 
     Attributes:
-    -----------
+    ===========
     rxn_id : str
         id attribute of <reaction> XML element
     is_reversible : bool
@@ -330,12 +333,12 @@ class RxnData:
         """Returns equation representation of reaction.
 
         Returns:
-        --------
+        ========
         full_rxn_eqn : str
             Equation representation of reaction, as a string
 
-        Note:
-        -----
+        Notes:
+        ======
             - Species are listed in alphabetical order on both
                 reactant and product sides.
         """
@@ -351,14 +354,15 @@ class RxnData:
     @staticmethod
     def __build_equation_side(species_dict):
         """Builds one side of reaction equation (reactant or product side).
+        Helper function for function get_equation().
 
         Args:
-        -----
-        species_dict : dict[str, int]
+        =====
+        species_dict : dict[str, int], required
             dictionary mapping species to stoichiometric coefficients
 
         Returns:
-        --------
+        ========
         rxn_eqn : str
             One side of reaction equation as a string
         """

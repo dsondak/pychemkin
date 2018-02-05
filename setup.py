@@ -27,6 +27,6 @@ setup(
     test_suite='tests',
     include_package_data=True,
     package_data={
-        'pychemkin': [os.path.join('pychemkin', 'thermo_data', '*.sqlite')]
+        'pychemkin': [os.path.join('pychemkin', 'thermo_database', '*.sqlite')]
     }
     )

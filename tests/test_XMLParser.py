@@ -1,15 +1,15 @@
 
-"""Tests for XmlParser"""
+"""Tests for XMLParser"""
 
 import pytest
 
-from pychemkin.preprocessing.Parser import XmlParser, RxnType
+from pychemkin.parsers.XMLParser import XMLParser, RxnType
 from pychemkin.pychemkin_errors import PyChemKinError
 
 
 def test_parse_basic_functionality():
     """Tests attributes of XML file are parsed correctly."""
-    xml = XmlParser('tests/test_xml_files/rxns_ideal.xml')
+    xml = XMLParser('tests/test_xml_files/rxns_ideal.xml')
     species, rxns = xml.load()
 
     # Correct number of reactions returned.
@@ -32,7 +32,7 @@ def test_parse_basic_functionality():
 
 def test_parse_reactants_products():
     """Tests parsing of reactants and products."""
-    xml = XmlParser('tests/test_xml_files/rxns_ideal.xml')
+    xml = XMLParser('tests/test_xml_files/rxns_ideal.xml')
     species, rxns = xml.load()
 
     err_msg = 'reactants not parsed correctly.'
@@ -46,7 +46,7 @@ def test_parse_reactants_products():
 
 def test_parse_rxn_coeff():
     """Tests parsing of reaction rate coefficients."""
-    xml = XmlParser('tests/test_xml_files/rxns.xml')
+    xml = XMLParser('tests/test_xml_files/rxns.xml')
     species, rxns = xml.load()
 
     rxn1_coeff = rxns[0].rate_coeff
@@ -68,7 +68,7 @@ def test_parse_rxn_coeff():
 
 def test_rxndata_equation():
     """Tests equation representation of RxnData."""
-    xml = XmlParser('tests/test_xml_files/rxns_ideal.xml')
+    xml = XMLParser('tests/test_xml_files/rxns_ideal.xml')
     species, rxns = xml.load()
 
     err_msg = 'get_equation() method result different than expected.'
@@ -84,7 +84,7 @@ def test_badparse_negative_A_arr():
     """Tests for case when Arrhenius coefficient component A for a
     reaction is negative.
     """
-    xml = XmlParser('tests/test_xml_files/rxns_neg_A_2')
+    xml = XMLParser('tests/test_xml_files/rxns_neg_A_2')
     try:
         rxns = xml.load()
     except PyChemKinError as err:
@@ -97,7 +97,7 @@ def test_badparse_negative_A_modarr():
     """Tests for case when modified Arrhenius coefficient component
     A for a reaction is negative.
     """
-    xml = XmlParser('tests/test_xml_files/rxns_neg_A')
+    xml = XMLParser('tests/test_xml_files/rxns_neg_A')
     try:
         rxns = xml.load()
     except PyChemKinError as err:
