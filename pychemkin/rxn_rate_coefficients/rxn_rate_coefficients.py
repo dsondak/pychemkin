@@ -190,114 +190,147 @@ class ModifiedArrheniusCoefficient(ArrheniusCoefficient):
         return self.k
 
 
-# class BackwardCoeff:
-#     """Class for backward reaction rate coefficients
-#     for reversible reactions."""
-#     def __init__(self, nui, nasa7_coeffs, p0=1.0e05, R=8.314):
-#         """Initializes BackwardCoeff.
+class BackwardRxnCoefficientBase:
+    """Base class for backward reaction rate coefficients.
+    
+    Methods:
+    ========
+    compute_backward_coeffs() : Calculates and returns the backward reaction
+        rate coefficient. To be implemented by subclasses.
+    """
+    def __init__(self):
+        pass
+
+    def compute_backward_coeffs(self):
+        """Calculates and returns the backward eaction rate coefficient.
         
-#         INPUTS:
-#         -------
-#         nui : numpy.ndarray
-#             stoichiometric coefficient difference (stoich_products - stoich_reactants)
-#                 for a single reversible reaction
-#         nasa7_coeffs : numpy.ndarray
-#             NASA polynomial coefficients (from appropriate temperature range)
-#                 corresponding to species in reversible reaction
-#         ATTRIBUTES:
-#         -----------
-#         p0 : float
-#             pressure of reaction, in Pascals
-#         R : float
-#             gas constant, in J / mol / K
-#         gamma : numpy.ndarray
-#             sum of stoichiometric coefficient difference 
-#         """
-#         self.nui = nui
-#         self.nasa7_coeffs = nasa7_coeffs
-#         self.gamma = numpy.sum(self.nui, axis=0)
-#         self.p0 = p0
-#         self.R = R
+        Notes:
+        ======
+        - Not implemented in this base class but should be
+            implemented by its subclasses.
+        """
+        raise NotImplementedError('Subclass must implement this method!')
 
-#     def H_over_RT(self, T):
-#         """Returns the enthalpy of each specie given by
-#         the NASA polynomials.
-#         INPUTS:
-#         -------
-#         T : float
-#             temperature of reaction
-#         RETURNS:
-#         --------
-#         H_RT : numpy.ndarray
-#             enthalpy values for each specie
-#         NOTES:
-#         ------
-#         PRE:
-#             - Raises ValueError if inputed temperature is non-positive
-#         """
-#         if T <= 0:
-#             raise ValueError("Temperature has to be a positive value!")
 
-#         a = self.nasa7_coeffs
-#         H_RT = (a[:, 0] + (0.5 * a[:, 1] * T) + (a[:, 2] * T ** 2.0) / 3.0
-#                 + (a[:, 3] * T ** 3.0) / 4.0 + (a[:, 4] * T ** 4.0) / 5.0
-#                 + a[:, 5] / T)
-#         return H_RT
+class NASA7BackwardCoeffs(BackwardRxnCoefficientBase):
+    """Class for computing backward reaction rate
+    coefficients for reversible reactions."""
+    def __init__(self, nui, nasa7_coeffs, p0=1e5, R=8.3144598):
+        """Initializes backward coefficients using 7th order NASA polynomials.
 
-#     def S_over_R(self, T):
-#         """Returns the entropy of each specie given by
-#         the NASA polynomials.
-#         INPUTS:
-#         -------
-#         T : float
-#             temperature of reaction
-#         RETURNS:
-#         --------
-#         S_R : numpy.ndarray
-#             entropy values for each specie
-#         NOTES:
-#         ------
-#         PRE:
-#             - Raises ValueError if inputed temperature is non-positive
-#         """
-#         if T <= 0:
-#             raise ValueError("Temperature has to be a positive value!")
+        Args:
+        =====
+        nui : numpy.ndarray
+            stoichiometric coefficient difference (stoich_products - stoich_reactants)
+                for a single reversible reaction
+        nasa7_coeffs : numpy.ndarray
+            NASA polynomial coefficients (from appropriate temperature range)
+                corresponding to species in reversible reaction
 
-#         a = self.nasa7_coeffs
-#         S_R = (a[:, 0] * numpy.log(T) + a[:, 1] * T + (a[:, 2] * T ** 2.0) / 2.0
-#                + (a[:, 3] * T ** 3.0) / 3.0 + (a[:, 4] * T ** 4.0) / 4.0 + a[:, 6])
-#         return S_R
+        Attributes:
+        ===========
+        p0 : float
+            pressure of reaction, in Pascals
+        R : float
+            gas constant, in J / mol / K
+        gamma : numpy.ndarray
+            sum of stoichiometric coefficient difference 
+        """
+        super().__init__()
+        self.nui = nui
+        self.nasa7_coeffs = nasa7_coeffs
+        self.p0 = p0
+        self.R = R
+        self.gamma = numpy.sum(self.nui)
 
-#     def compute_backward_coeffs(self, kf, T):
-#         """Returns the backward reaction rate
-#         coefficient for each specie.
-#         INPUTS:
-#         -------
-#         kf : numpy.ndarray[float]
-#             array of forward reaction rate coefficients for each specie in reaction
-#         T : float
-#             temperature of reaction
-#         RETURNS:
-#         --------
-#         kb : backward reaction rate coefficient for each specie
-#         NOTES:
-#         ------
-#         PRE:
-#             - Raises ValueError if inputed temperature is non-positive
-#         """
-#         if T <= 0:
-#             raise ValueError("Temperature has to be a positive value!")
+    def H_over_RT(self, T):
+        """Helper function that returns the enthalpy of each specie given by
+        the NASA polynomials.
 
-#         # Change in enthalpy and entropy for each reaction
-#         delta_H_over_RT = numpy.dot(self.nui, self.H_over_RT(T))
-#         delta_S_over_R = numpy.dot(self.nui, self.S_over_R(T))
+        Args:
+        =====
+        T : float, required
+            temperature of reaction
 
-#         # Negative of change in Gibbs free energy for each reaction
-#         delta_G_over_RT = delta_S_over_R - delta_H_over_RT
+        Returns:
+        ========
+        H_RT : numpy.ndarray
+            enthalpy values for each specie
 
-#         # Prefactor in k_e (equilibrium coefficient)
-#         fact = self.p0 / self.R / T
+        Notes:
+        ======
+        PRE:
+            - Raises ValueError if inputed temperature is non-positive
+        """
+        if T <= 0:
+            raise ValueError("Temperature has to be a positive value!")
 
-#         ke = (fact ** self.gamma) * numpy.exp(delta_G_over_RT)
+        a = self.nasa7_coeffs
+        H_RT = (a[:, 0] + (0.5 * a[:, 1] * T) + (a[:, 2] * T ** 2.0) / 3.0
+                + (a[:, 3] * T ** 3.0) / 4.0 + (a[:, 4] * T ** 4.0) / 5.0
+                + a[:, 5] / T)
+        return H_RT
 
-#         return kf / ke
+    def S_over_R(self, T):
+        """Helper function that returns the entropy of each specie given by
+        the NASA polynomials.
+
+        Args:
+        =====
+        T : float
+            temperature of reaction
+
+        Returns:
+        ========
+        S_R : numpy.ndarray
+            entropy values for each specie
+
+        Notes:
+        ======
+        PRE:
+            - Raises ValueError if inputed temperature is non-positive
+        """
+        if T <= 0:
+            raise ValueError("Temperature has to be a positive value!")
+
+        a = self.nasa7_coeffs
+        S_R = (a[:, 0] * numpy.log(T) + a[:, 1] * T + (a[:, 2] * T ** 2.0) / 2.0
+               + (a[:, 3] * T ** 3.0) / 3.0 + (a[:, 4] * T ** 4.0) / 4.0 + a[:, 6])
+        return S_R
+
+    def compute_backward_coeffs(self, kf, T):
+        """Returns the backward reaction rate
+        coefficient for each specie.
+
+        Args:
+        =====
+        kf : numpy.ndarray[float]
+            array of forward reaction rate coefficients for each specie in reaction
+        T : float
+            temperature of reaction
+
+        Returns:
+        ========
+        kb : backward reaction rate coefficient for each specie
+
+        Notes:
+        ======
+        PRE:
+            - Raises ValueError if inputed temperature is non-positive
+        """
+        if T <= 0:
+            raise ValueError("Temperature has to be a positive value!")
+
+        # Change in enthalpy and entropy for each reaction
+        delta_H_over_RT = numpy.dot(self.nui, self.H_over_RT(T))
+        delta_S_over_R = numpy.dot(self.nui, self.S_over_R(T))
+
+        # Negative of change in Gibbs free energy for each reaction
+        delta_G_over_RT = delta_S_over_R - delta_H_over_RT
+
+        # Prefactor in k_e (equilibrium coefficient)
+        fact = self.p0 / self.R / T
+
+        ke = (fact ** self.gamma) * numpy.exp(delta_G_over_RT)
+
+        return kf / ke

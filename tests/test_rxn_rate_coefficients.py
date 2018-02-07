@@ -4,10 +4,16 @@
 import numpy
 import pytest
 
+import warnings
+# Treat warnings like errors (for testing purposes)
+warnings.simplefilter("error")
+
 from pychemkin.rxn_rate_coefficients.rxn_rate_coefficients import (RxnCoefficientBase,
                                                                    ConstantCoefficient,
                                                                    ArrheniusCoefficient,
-                                                                   ModifiedArrheniusCoefficient)
+                                                                   ModifiedArrheniusCoefficient,
+                                                                   BackwardRxnCoefficientBase,
+                                                                   NASA7BackwardCoeffs)
 
 
 def test_instantiating_RxnCoefficientBase():
@@ -160,3 +166,73 @@ def test_overflow_ModifiedArrheniusCoefficient():
     with pytest.raises(OverflowError):
         k_modarr = ModifiedArrheniusCoefficient(A=A, b=b, E=E, T=T)
         k_modarr.get_coefficient()
+
+
+
+# ======================= TESTS FOR BACKWARDCOEFF ====================== #
+
+@pytest.fixture
+def test_backward_coeff():
+    """Returns a working (but artificial) example of
+    backward reaction rate coefficient."""
+    expected_nasa = numpy.array([[1,0,0,0,0,0,0],
+                                [1,0,0,0,0,0,0],
+                                [1,0,0,0,0,0,0]])
+    k_f = 100
+    nu_i = numpy.array([-2, -1, 2])
+    bkwd_coeff = NASA7BackwardCoeffs(nu_i, expected_nasa)
+    return bkwd_coeff
+
+def test_backwardCoeff_gamma(test_backward_coeff):
+    """Tests value of gamma for working example."""
+    assert test_backward_coeff.gamma == -1
+
+def test_backwardCoeff_computing_H(test_backward_coeff):
+    """Tests computing H/RT for working example."""
+    T = 100
+    expected_H_over_RT = numpy.array([1, 1, 1])
+    assert numpy.isclose(test_backward_coeff.H_over_RT(T),
+                         expected_H_over_RT).all()
+
+def test_backwardCoeff_computing_H_neg_T(test_backward_coeff):
+    """Tests computing H/RT for working example with neg T."""
+    T = -100
+    with pytest.raises(ValueError):
+        test_backward_coeff.H_over_RT(T)
+
+def test_backwardCoeff_computing_S(test_backward_coeff):
+    """Tests computing S/R for working example."""
+    T = 100
+    expected_S_over_R = numpy.array([4.60517, 4.60517, 4.60517])
+    assert numpy.isclose(test_backward_coeff.S_over_R(T),
+                         expected_S_over_R).all()
+
+def test_backwardCoeff_computing_S_neg_T(test_backward_coeff):
+    """Tests computing S/R for working example with neg T."""
+    T = -100
+    with pytest.raises(ValueError):
+        test_backward_coeff.S_over_R(T)
+
+def test_backwardCoeff_computeCoeff(test_backward_coeff):
+    """Tests computing k_b for working example."""
+    T = 100
+    k_f = 100
+    expected_delta_S_over_R = -4.60517
+    expected_delta_H_over_RT = -1
+
+    fact =  test_backward_coeff.p0 / test_backward_coeff.R / T
+    expected_gamma = -1
+    expected_ke = (fact ** expected_gamma) * (numpy.exp(expected_delta_S_over_R - 
+                                                        expected_delta_H_over_RT))
+
+    expected_kb_val = 442457 # 100 / 2.260104919e-6
+
+    assert numpy.isclose(test_backward_coeff.compute_backward_coeffs(k_f, T),
+                         expected_kb_val)
+
+def test_backwardCoeff_computeCoeff_neg_T(test_backward_coeff):
+    """Tests computing k_b for working example with neg T."""
+    T = -100
+    k_f = 100
+    with pytest.raises(ValueError):
+        test_backward_coeff.compute_backward_coeffs(k_f, T)

@@ -55,25 +55,3 @@ class SQLParser:
         db.close()
         return species
 
-    def fetch_data(self):
-        """Queries SQL database and stores NASA polynomial coefficients in a dictionary.
-        
-
-        """
-        db = sqlite3.connect(self.database)
-        cursor = db.cursor()
-        data = dict()
-        #get low-temperature coefficients
-        for row in cursor.execute('''SELECT * FROM LOW''').fetchall():
-            data[row[0]] = {'low':{'Ts':row[1:3], 'coeffs':row[3:]}}
-        #get high-temperature coefficients
-        for row in cursor.execute('''SELECT * FROM HIGH''').fetchall():
-            if row[0] not in data:
-                data[row[0]] = {'high':{'Ts':row[1:3], 'coeffs':row[3:]}}
-            else:
-                data[row[0]]['high'] = {'Ts':row[1:3], 'coeffs':row[3:]}
-        db.close()
-        self.data = data
-
-
-
