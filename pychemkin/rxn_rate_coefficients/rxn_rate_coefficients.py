@@ -1,196 +1,223 @@
 
 """Classes for reaction rate coefficients."""
 
+import numbers
 import numpy
 from pychemkin.parsers import SQLParser
-from pychemkin.pychemkin_errors import PyChemKinError
+import warnings
 
 
-class RxnCoefficientBase:
-    """Base class for reaction rate coefficient.
-    
-    Attributes:
-    ===========
-    k : float
-        Reaction rate coefficient, initialized to None
+class ReactionCoeff:
+    """Class for reaction rate coefficients, or values k."""
+    def __init__(self, k_parameters, T=None):
+        """Initializes reaction rate coefficients.
 
-    Methods:
-    ========
-    get_coefficient() : Calculates and returns the reaction
-        rate coefficient. To be implemented by subclasses.
-    """
-    def __init__(self):
-        self.k = None
-
-    def __repr__(self):
-        return 'RxnCoefficientBase()'
-
-    def get_coefficient(self):
-        """Calculates and returns the reaction rate coefficient.
-        
-        Notes:
-        ======
-        - Not implemented in this base class but should be
-            implemented by its subclasses.
+        INPUTS:
+        -------
+        T : int or float
+            temperature of the reaction (in Kelvin)
+        k_parameters : dictionary
+            dictionary of parameters to compute k
         """
-        raise NotImplementedError('Subclass must implement this method!')
-
-
-class ConstantCoefficient(RxnCoefficientBase):
-    """Class for constant reaction rate coefficient.
-
-    Attributes:
-    ===========
-    k : float, required
-        Constant reaction rate coefficient
-    """
-    def __init__(self, k):
-        """Initializes ConstantCoefficient.
-
-        Notes:
-        ======
-        - Raises a ValueError if inputed constant reaction
-            rate coefficient is negative.
-        """
-        super().__init__()
-        if k <= 0:
-            raise ValueError("Reaction rate coefficients must be positive!")
-        self.k = k
-
-    def __repr__(self):
-        return 'ConstantCoefficient(k={})'.format(self.k)
-
-    def get_coefficient(self):
-        """Returns the reaction rate coefficient."""
-        return self.k
-
-
-class ArrheniusCoefficient(RxnCoefficientBase):
-    """Class for Arrhenius reaction rate coefficient.
-
-    Attributes:
-    ===========
-    A: float, required
-        Arrhenius prefactor
-    E: float, required
-        Activation energy
-    T: float, required
-        Temperature, in Kelvin
-    R: float, optional, default value = 8.314
-        Ideal gas constant
-        Default value of R should not be changed except for unit conversion
-    k: float
-        Reaction rate coefficient, calculated by get_coefficient()
-    """
-    def __init__ (self, A, E, T, R=8.314):
-        """Initializes ArrheniusCoefficient.
-
-        Notes:
-        ======
-        - Raises a ValueError if ...
-            Arrhenius prefactor is non-positive
-            Temperature is non-positive
-            Ideal gas constant is non-positive
-        """
-        super().__init__()
-        if A <= 0.0:
-            raise ValueError(
-                  "A = {0:18.16e}:  Non-positive Arrhenius prefactor is "
-                  "prohibited!".format(A))
-
-        if T <= 0.0:
-            raise ValueError(
-                  "T = {0:18.16e}:  Non-positive temperatures are "
-                  "prohibited!".format(T))
-
-        if R <= 0.0:
-            raise ValueError(
-                  "R = {0:18.16e}:  Non-positive ideal gas constant is "
-                  "prohibited!".format(R))
-
-        self.A = A
-        self.E = E
+        self.k_parameters = k_parameters
         self.T = T
-        self.R = R
-        self.k = None
+        self.k = self.get_coeff(self.k_parameters, self.T)
 
-    def __repr__ (self):
-        return ('ArrheniusCoefficient(A={}, E={}, T={}, R={})'.format(
-                    self.A, self.E, self.T, self.R))
+    def get_coeff(self, k_parameters, T):
+        """Computes reaction rate coefficients depending on passed parameters.
 
-    def get_coefficient(self):
-        """"Returns the reaction rate coefficient.
+        INPUTS:
+        -------
+        T : int or float
+            temperature of the reaction (in Kelvin)
+        k_parameters : dictionary
+            dictionary of parameters to compute k
         
-        Notes:
-        ======
-        - Raises an OverflowError if resulting coefficient
-            is too large/small (numerical instability)
+        RETURNS:
+        --------
+        k : int or float
+            reaction rate coefficient of the reaction
+
+        NOTES:
+        ------
+        PRE:
+            - Raise ValueError if customized reaction rate coefficient depends on T
+        POST:
+            - Raises NotImplementedError if dictionary of k parameters is not recognized
+            - Options to alter values of R (to change units) but strongly discouraged
+            - Raises ValueError if valid T not inputed/set for Arrhenius and modified Arrhenius
         """
-        try:
-            self.k = self.A * numpy.exp(-self.E / (self.R * self.T))
-        except Warning:
-            raise OverflowError("The result is too large/small.")
-        return self.k
+        #check if the key-arguments are valid
+        keys = set(k_parameters.keys())
+        valid_keys = set(['A', 'E', 'b', "R", "k"])
+        if not(keys <= valid_keys):
+            raise ValueError("Invalid key in the input. Use get_coeff function to implement your own k!")
 
-
-class ModifiedArrheniusCoefficient(ArrheniusCoefficient):
-    """Class of Modified Arrhenius reaction rate coefficient.
-
-    Attributes:
-    ===========
-    A: float, required
-        Arrhenius prefactor
-    b: float, required
-        Modified Arrhenius parameter
-    E: float, required
-        Activation energy
-    T: float, required
-        Temperature, in Kelvin
-    R: float, optional, default value = 8.314
-        Ideal gas constant
-        Default value of R should not be changed except for unit conversion
-    k: float
-        Reaction rate coefficient
-    """
-    def __init__ (self, A, b, E, T, R=8.314):
-        """Initializes ModifiedArrheniusCoefficient.
-
-        Notes:
-        ======
-        - Raises a ValueError if ...
-            Arrhenius prefactor is non-positive
-            Temperature is non-positive
-            Ideal gas constant is non-positive
-            Modified Arrhenius parameter b is not real
-        """
-        super().__init__(A, E, T, R)
-
-        if not numpy.isreal(b):
-            raise ValueError('Modified Arrhenius parameter b must be real!')
-        self.b = b
-        self.k = None
-
-    def __repr__ (self):
-        return('ModifiedArrheniusCoefficient(A={}, b={}, E={}, T={}, R={})'.format(
-                    self.A, self.b, self.E, self.T, self.R))
-
-    def get_coefficient(self):
-        """"Returns the reaction rate coefficient.
+        # Constant
+        if "k" in k_parameters:
+            return self.const(k_parameters['k'])
         
-        Notes:
-        ======
-        - Raises an OverflowError if resulting coefficient
-            is too large/small (numerical instability)
+        # Arrhenius
+        elif ("A" in k_parameters and "E" in k_parameters and
+              "b" not in k_parameters):
+
+            if T == None:
+                raise ValueError("Temperature has not been set in the reaction. Please use set_temperature() method.")
+
+            if "R" in k_parameters:
+                return self.arr(A=k_parameters['A'],
+                                E=k_parameters['E'],
+                                T=T,
+                                R=k_parameters['R'])
+            else:
+                return self.arr(A=k_parameters['A'],
+                                E=k_parameters['E'],
+                                T=T)
+        
+        # Modified Arrhenius
+        elif ("A" in k_parameters and "E" in k_parameters  and "b" in k_parameters):
+            if T == None:
+                raise ValueError("Temperature has not been set in the reaction. Please use set_temperature() method.")
+
+            if "R" in k_parameters:
+                return self.mod_arr(A=k_parameters['A'],
+                                    E=k_parameters['E'],
+                                    R=k_parameters['R'],
+                                    b=k_parameters['b'],
+                                    T=T)
+            else:
+                return self.mod_arr(A=k_parameters['A'],
+                                    E=k_parameters['E'],
+                                    b=k_parameters['b'],
+                                    T=T)
+
+        else:
+            raise NotImplementedError("The combination of parameters entered is not supported for the calculation of Reaction Rate Coefficient.")
+
+
+    def const(self, k):
+        """Returns constant reaction rate coefficients k.
+
+        INPUTS:
+        -------
+        k : numeric type 
+            constant reaction rate coefficient
+
+        RETURNS:
+        --------
+        k : numeric type
+            constant reaction rate coefficients.
+
+        NOTES:
+        ------
+        POST:
+            - Raises ValueError if k is non-positive!
         """
-        try:
-            self.k = (self.A * numpy.power(self.T, self.b) *
-                      numpy.exp(-self.E / (self.R * self.T)))
-        except Warning:
-            raise OverflowError("The result is too large/small.")
-        return self.k
+        if k <= 0:
+            raise ValueError("Reaction rate must be positive.")
+        
+        return k
+
+    def arr(self, A, E, T, R=8.314):
+        """Returns Arrhenius reaction rate coefficients k.
+
+        INPUTS:
+        -------
+        A: float, strictly positive, no default value
+           The Arrhenius prefactor
+        E: float, no default value
+           The Arrhenius parameter
+        T: float, strictly positive, no default value
+           Temperature T, asuuming a Kelvin scale
+        R: float, default value is 8.314, cannot be changed except to convert units
+           The ideal gas constant
+
+        RETURNS:
+        --------
+        k: Arrhenius reaction rate coefficients k,
+           floats
+           unless A or T is not postive
+           in which case a ValueError exception is raised
+
+        NOTES:
+        ------
+        POST:
+            - Raises ValueError if A, T, or R is non-positive
+            - Raises Warning if user changes value of R
+        """
+        if (A <= 0):
+            raise ValueError("Arrhenius prefactor 'A' must be positive.")
+
+        if (T <= 0):
+            raise ValueError("Temperatures 'T' must be positive.")
+
+        if (R <= 0):
+            raise ValueError("Gas constant 'R' must be positive.")
+
+        if not numpy.isclose(R, 8.314):
+            warnings.warn("Please do not change the value of"
+                          " Universal Gas Constant 'R' unless you are converting units.")
+
+        k = A * numpy.exp(-E / R / T)
+        return k
+
+    def mod_arr(self, A, b, E, T, R=8.314):
+        """Returns Arrhenius reaction rate coefficients k.
+
+        INPUTS:
+        -------
+        A: float, strictly positive, no default value
+           The Arrhenius prefactor
+        b: real, no default value
+           Modified Arrhenius parameter
+        E: float, no default value
+           The Arrhenius parameter
+        T: float, strictly positive, no default value
+           Temperature T, asuuming a Kelvin scale
+        R: float, default value is 8.314, cannot be changed except to convert units
+           The ideal gas constant
+
+        RETURNS:
+        --------
+        k: Arrhenius reaction rate coefficients k,
+           floats
+           unless A or T is not postive
+           in which case a ValueError exception is raised
+           Or b is not a real number
+           in which case a TypeError exception is raised
+
+        NOTES:
+        ------
+        POST:
+            - Raises ValueError if A, T, or R is non-positive
+            - Raises TypeError if b is not real
+            - Raises Warning if user changes value of R
+        """
+
+        if (A <= 0):
+            raise ValueError("Parameter 'A' must be positive.")
+        
+        if (T <= 0):
+            raise ValueError("Parameter 'T' must be positive.")
+        
+        if (isinstance(b, numbers.Real)) == False:
+            raise TypeError("Parameter 'b' must be a real number.")
+        
+        if (R <= 0):
+            raise ValueError("Gas constant 'R' must be positive.")
+
+        if not numpy.isclose(R, 8.314):
+            warnings.warn("Please do not change the value of"
+                          " Universal Gas Constant 'R' unless for converting units.")
+
+        k = A * T ** b * numpy.exp(-E / R / T)
+        return k
 
 
-class BackwardRxnCoefficientBase:
+
+
+
+class BackwardReactionCoeff:
     """Base class for backward reaction rate coefficients.
     
     Methods:
@@ -212,7 +239,7 @@ class BackwardRxnCoefficientBase:
         raise NotImplementedError('Subclass must implement this method!')
 
 
-class NASA7BackwardCoeffs(BackwardRxnCoefficientBase):
+class NASA7BackwardCoeffs(BackwardReactionCoeff):
     """Class for computing backward reaction rate
     coefficients for reversible reactions."""
     def __init__(self, nui, nasa7_coeffs, p0=1e5, R=8.3144598):
@@ -235,6 +262,12 @@ class NASA7BackwardCoeffs(BackwardRxnCoefficientBase):
             gas constant, in J / mol / K
         gamma : numpy.ndarray
             sum of stoichiometric coefficient difference 
+
+        Notes:
+        ======
+        PRE:
+            - Assuming ordering of stochiometric coefficient difference consistent
+            with ordering of species in all involved functions
         """
         super().__init__()
         self.nui = nui
@@ -304,9 +337,9 @@ class NASA7BackwardCoeffs(BackwardRxnCoefficientBase):
 
         Args:
         =====
-        kf : numpy.ndarray[float]
+        kf : numpy.ndarray[float], required
             array of forward reaction rate coefficients for each specie in reaction
-        T : float
+        T : float, required
             temperature of reaction
 
         Returns:

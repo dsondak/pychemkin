@@ -5,17 +5,7 @@ from enum import Enum
 import numpy
 import os
 import xml.etree.ElementTree as ET
-from pychemkin.pychemkin_errors import PyChemKinError
-
-
-class RxnType(Enum):
-    """Class for enumerating reaction types."""
-    Elementary = 1
-    Nonelementary = 2
-
-
-############### TEMP
-from chemkinlib.reactions import Reactions
+from pychemkin.reactions.Reactions import *
 
 
 class XMLParser:
@@ -72,10 +62,6 @@ class XMLParser:
         for specie in species_list:
             self.species[specie] = None
         return self.species
-
-
-
-
 
     def get_rxn_type(self, reaction):
         """Helper function that returns reaction type from input.
@@ -147,7 +133,7 @@ class XMLParser:
                         raise ValueError("Missing component 'k' for constant type rxn rate coefficient.")
                     else:
                         k = float(arr.find('k').text)
-                rate_coeffs_components = {'k': k}
+                rate_coeffs_components = {"k": k}
 
             # Arrhenius-type
             elif coeff.find('Arrhenius') is not None:
@@ -240,14 +226,14 @@ class XMLParser:
 
                 # IRREVERSIBLE elementary reaction case
                 if is_reversible == False and rxn_type == "Elementary":
-                    rxn = Reactions.IrreversibleReaction(rxn_type, is_reversible, rxn_equation,
+                    rxn = IrreversibleElementaryReaction(rxn_type, is_reversible, rxn_equation,
                                            species, rate_coeffs_components,
                                            reactant_stoich_coeffs, product_stoich_coeffs)
                     self.reaction_list.append(rxn)
 
                 # REVERSIBLE elementary reaction case
                 elif is_reversible == True and rxn_type == "Elementary":
-                    rxn = Reactions.ReversibleReaction(rxn_type, is_reversible, rxn_equation,
+                    rxn = ReversibleElementaryReaction(rxn_type, is_reversible, rxn_equation,
                                          species, rate_coeffs_components,
                                          reactant_stoich_coeffs, product_stoich_coeffs)
                     self.reaction_list.append(rxn)
