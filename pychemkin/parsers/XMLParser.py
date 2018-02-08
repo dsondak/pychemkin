@@ -38,7 +38,7 @@ class XMLParser:
             tree = ET.parse(self.xml_filename)
             self.rxns = tree.getroot()
         else:
-            raise IOError("Reaction (xml) file not found!")
+            raise OSError("Reaction (xml) file not found!")
 
         self.reaction_list = []
         self.species = {}
