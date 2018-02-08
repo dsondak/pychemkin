@@ -33,12 +33,12 @@ class XMLParser:
         POST:
             - Raises IOError if XML file not found
         """
-        if os.path.isfile(xml_filename):
-            self.xml_filename = xml_filename
-            tree = ET.parse(self.xml_filename)
-            self.rxns = tree.getroot()
-        else:
-            raise OSError("Reaction (xml) file not found!")
+        #if os.path.isfile(xml_filename):
+        self.xml_filename = xml_filename
+        tree = ET.parse(self.xml_filename)
+        self.rxns = tree.getroot()
+        # else:
+        #     raise OSError("Reaction (xml) file not found!")
 
         self.reaction_list = []
         self.species = {}

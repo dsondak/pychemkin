@@ -17,7 +17,7 @@ def test_RxnParser_file_not_found():
 def test_RxnParser_species():
     """Test when reaction rate coefficient is modified
     Arrhenius but R is changed by user"""
-    xml_filename = os.path.join("test_xml_files","rxns.xml")
+    xml_filename = "test_xml_files/rxns.xml"
     parser = XMLParser(xml_filename)
     assert parser.get_species() == ({'H': None,'O': None, 'OH': None,
                                     'H2': None, 'H2O': None, 'O2': None})
