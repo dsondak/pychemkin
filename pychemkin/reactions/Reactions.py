@@ -243,7 +243,7 @@ class ElementaryReaction(object):
             return reaction_rate_1_eq
 
         except NotImplementedError:
-            raise ReactionError('''You must first implement the functions to
+            raise ElementaryReactionError('''You must first implement the functions to
                                 compute the reaction rate coefficients and progress rates!''')
 
 
@@ -328,7 +328,7 @@ class RevElemReactionError(Exception):
 class RevElemReaction(ElementaryReaction):
     """Class for reversible reaction"""
     def __init__(self, rxn_type, is_reversible, rxn_equation, species_list, rate_coeffs_components,
-                 reactant_stoich_coeffs, product_stoich_coeffs):
+                 reactant_stoich_coeffs, product_stoich_coeffs, bkwd_coeff_type="NASA7"):
         """Initializes reaction that is reversible and elementary.
 
         NOTES:
@@ -341,6 +341,7 @@ class RevElemReaction(ElementaryReaction):
                                               species_list, rate_coeffs_components,
                                               reactant_stoich_coeffs, product_stoich_coeffs)
 
+        self.bkwd_coeff_type = bkwd_coeff_type
         self.NASA_poly_coefs_dict = None
         self.NASA_poly_coefs = None
 
@@ -379,7 +380,12 @@ class RevElemReaction(ElementaryReaction):
         if (self.NASA_poly_coefs is None):
             raise ValueError("Must set NASA polynomial coefficients before computing rxn rate coefficients!")
         
-        back_coeffs = BackwardCoeff(nui, self.NASA_poly_coefs)
+        if self.bkwd_coeff_type == "NASA7":
+            back_coeffs = NASA7BackwardCoeffs(nui, self.NASA_poly_coefs)
+        else:
+            raise NotImplementedError("This type of coefficients for computing backward "
+                                      "reaction rate coefficients is not currently suppoerted.")
+
         self.backward_rxn_rate_coeff = back_coeffs.compute_backward_coeffs(self.forward_rxn_rate_coeff,
                                                                            self.temperature)
         return self.forward_rxn_rate_coeff, self.backward_rxn_rate_coeff

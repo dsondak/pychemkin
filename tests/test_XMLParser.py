@@ -7,14 +7,14 @@ import os
 from pychemkin.parsers.XMLParser import XMLParser
 
 
-# ======================= TESTS FOR REACTIONPARSER OBJECT ====================== #
+# ======================= TESTS FOR XML PARSER OBJECT ====================== #
 
-def test_RxnParser_file_not_found():
+def test_XMLParser_file_not_found():
     """Test when xml file is nonexistent"""
-    with pytest.raises(IOError):
+    with pytest.raises(OSError):
         parser = XMLParser("no_such_file")
 
-def test_RxnParser_species():
+def test_XMLParser_species():
     """Test when reaction rate coefficient is modified
     Arrhenius but R is changed by user"""
     xml_filename = "tests/test_xml_files/rxns.xml"
@@ -22,39 +22,39 @@ def test_RxnParser_species():
     assert parser.get_species() == ({'H': None,'O': None, 'OH': None,
                                     'H2': None, 'H2O': None, 'O2': None})
     
-def test_RxnParser_type():
+def test_XMLParser_type():
     """Test get_rxn_type() for an elementary reaction."""
     xml_filename = "tests/test_xml_files/rxns.xml"
     parser = XMLParser(xml_filename)
     assert parser.reaction_list[0].rxn_type == 'Elementary'
     
-def test_RxnParser_rate_coeffs_components():
+def test_XMLParser_rate_coeffs_components():
     """Test get_rate_coeffs_components for reaction 1."""
     xml_filename = "tests/test_xml_files/rxns.xml"
     parser = XMLParser(xml_filename)
     assert (parser.reaction_list[0].rate_coeffs_components ==
             {'A': 35200000000.0, 'E': 71400.0})
     
-def test_RxnParser_is_reversible():
+def test_XMLParser_is_reversible():
     """Test get_is_reversible for reaction irreversible reaction."""
     xml_filename = "tests/test_xml_files/rxns.xml"
     parser = XMLParser(xml_filename)
     assert parser.reaction_list[0].is_reversible == False
 
-def test_RxnParser_rxn_equation():
+def test_XMLParser_rxn_equation():
     """Test get_rxn_equation for reaction 1."""
     xml_filename = "tests/test_xml_files/rxns.xml"
     parser = XMLParser(xml_filename)
     assert parser.reaction_list[0].rxn_equation == 'H + O2 =] OH + O'
     
-def test_RxnParser_reactant_stoich_coeffs():
+def test_XMLParser_reactant_stoich_coeffs():
     """Test get_reactant_stoich_coeffs for reaction 1."""
     xml_filename = "tests/test_xml_files/rxns.xml"
     parser = XMLParser(xml_filename)
     assert (parser.reaction_list[0].reactant_stoich_coeffs ==
             {'H': 1, 'H2': 0, 'H2O': 0, 'O': 0, 'O2': 1, 'OH': 0})
 
-def test_RxnParser_product_stoich_coeffs():
+def test_XMLParser_product_stoich_coeffs():
     """Test get_product_stoich_coeffs for reaction 1."""
     xml_filename = "tests/test_xml_files/rxns.xml"
     parser = XMLParser(xml_filename)

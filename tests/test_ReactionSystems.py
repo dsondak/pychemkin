@@ -51,8 +51,6 @@ def test_rxn_sys_invalid_temperature():
 
 def test_rxn_sys_get_reaction_rate_for_1_rxn(test_rxn_sys):
     """Tests function to get reaction rate for a given system of reactions (just 1 reaction)."""
-    # print(test_rxn_sys.involved_species)
-    # assert test_rxn_sys.get_reaction_rate() == -15.
     rates = test_rxn_sys.sort_reaction_rates()
     assert rates['H'] == -30.
     assert rates['O2'] == -15.
@@ -70,7 +68,6 @@ def test_rxn_sys_get_reaction_rate_for_3_rxns():
     concentrations = {'H':1, 'O2':1, 'OH':1, 'O':1, 'H2O':1, 'H2':1}
     rxnsys = ReactionSystem(xml_parser.reaction_list, thermo_coeffs, temp, concentrations)
     rates = rxnsys.sort_reaction_rates()
-    # assert rxnsys.get_reaction_rate() == -10.
     assert rates['H'] == -10.
     assert rates['O2'] == -15.
     assert rates['H2O'] == 40.
@@ -91,14 +88,6 @@ def test_rxn_sys_get_lowT_nasa_matrix(test_rxn_sys):
                     'O2': numpy.array([3.28253784e+00, 1.48308754e-03, -7.57966669e-07,
                                       2.09470555e-10, -2.16717794e-14, -1.08845772e+03,
                                       5.45323129e+00])}
-
-    
-    # expected_nasa = numpy.array([[2.50000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 
-    #                             0.00000000e+00, 2.54716270e+04, -4.60117608e-01],
-    #                             [3.38684249e+00, 3.47498246e-03, -6.35469633e-06, 6.96858127e-09,
-    #                             -2.50658847e-12, -3.02081133e+04, 2.59023285e+00],
-    #                             [3.21293640e+00, 1.12748635e-03, -5.75615047e-07, 1.31387723e-09,
-    #                             -8.76855392e-13, -1.00524902e+03, 6.03473759e+00]])
     assert (numpy.isclose(test_rxn_sys.NASA_matrix['H2O'], expected_nasa['H2O'])).all()
     assert (numpy.isclose(test_rxn_sys.NASA_matrix['O2'], expected_nasa['O2'])).all()
     assert (numpy.isclose(test_rxn_sys.NASA_matrix['H'], expected_nasa['H'])).all()
@@ -124,13 +113,6 @@ def test_rxn_sys_get_highT_nasa_matrix():
                     'H': numpy.array([2.50000000e+00, 7.05332819e-13, -1.99591964e-15,
                                      2.30081632e-18, -9.27732332e-22, 2.54736599e+04,
                                      -4.46682853e-01])}
-    # expected_nasa = numpy.array([[2.50000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 
-    #                             0.00000000e+00, 2.54716270e+04, -4.60117608e-01],
-    #                             [2.67214561e+00, 3.05629289e-03, -8.73026011e-07, 1.20099639e-10,
-    #                             -6.39161787e-15, -2.98992090e+04, 6.86281681e+00],
-    #                             [3.69757819e+00, 6.13519689e-04, -1.25884199e-07, 1.77528148e-11,
-    #                             -1.13643531e-15, -1.23393018e+03, 3.18916559e+00]])
-    #assert numpy.isclose(rxnsys.NASA_matrix, expected_nasa).all()
     assert (numpy.isclose(rxnsys.NASA_matrix['H2O'], expected_nasa['H2O'])).all()
     assert (numpy.isclose(rxnsys.NASA_matrix['O2'], expected_nasa['O2'])).all()
     assert (numpy.isclose(rxnsys.NASA_matrix['H'], expected_nasa['H'])).all()
@@ -146,12 +128,6 @@ def test_rxn_sys_rev_reaction():
     temp = 500 # "low" temperature range in NASA coeffs database
     concentrations = {'H':1, 'O2':1, 'H2O':1}
     rxnsys = ReactionSystem(xml_parser.reaction_list, thermo_coeffs, temp, concentrations)
-    # expected_nasa = numpy.array([[2.50000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 
-    #                             0.00000000e+00, 2.54716270e+04, -4.60117608e-01],
-    #                             [3.38684249e+00, 3.47498246e-03, -6.35469633e-06, 6.96858127e-09,
-    #                             -2.50658847e-12, -3.02081133e+04, 2.59023285e+00],
-    #                             [3.21293640e+00, 1.12748635e-03, -5.75615047e-07, 1.31387723e-09,
-    #                             -8.76855392e-13, -1.00524902e+03, 6.03473759e+00]])
     expected_nasa = {'O2': numpy.array([3.28253784e+00, 1.48308754e-03, -7.57966669e-07,
                                        2.09470555e-10, -2.16717794e-14, -1.08845772e+03,
                                        5.45323129e+00]),

@@ -13,7 +13,7 @@ class SQLParser:
     def __init__ (self, database, species):
         self.database = os.path.join(DB_DIRECTORY, database)
         if not os.path.isfile(self.database):
-            raise ValueError('Database {} does not exist'.format(self.database))
+            raise OSError('Database {} does not exist'.format(self.database))
         self.species = species
         self.thermo_coefficients = {}
 
@@ -53,9 +53,6 @@ class SQLParser:
         nasa_coeffs : numpy.ndarray
             nasa coefficients for species in reaction
         """
-        if temp_range not in ['high', 'low']:
-            raise ValueError("Temperature range can only be 'high' or 'low'...")
-
         if temp_range == "high":
             db_cursor.execute('''SELECT COEFF_1, COEFF_2, COEFF_3, COEFF_4, 
                            COEFF_5, COEFF_6, COEFF_7 FROM HIGH WHERE 
