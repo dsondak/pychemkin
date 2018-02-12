@@ -105,7 +105,7 @@ def test_Reaction_set_neg_concentrations(test_base_reaction):
 @pytest.fixture
 def test_irrev_reaction():
     """Returns a valid reaction (from rxns.xml)"""
-    return IrreversibleElementaryReaction(rxn_type="Elementary",
+    return IrrevElemReaction(rxn_type="Elementary",
                                 is_reversible=False,
                                 rxn_equation="H2 + OH =] H2O + H",
                                 species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
@@ -116,7 +116,7 @@ def test_irrev_reaction():
 @pytest.fixture
 def test_irrev_reaction_arrhenius():
     """Returns a reaction with Arrhenius reaction rate coefficient."""
-    return IrreversibleElementaryReaction(rxn_type="Elementary",
+    return IrrevElemReaction(rxn_type="Elementary",
                                 is_reversible=False,
                                 rxn_equation="H2 + OH =] H2O + H",
                                 species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
@@ -127,7 +127,7 @@ def test_irrev_reaction_arrhenius():
 @pytest.fixture
 def test_irrev_reaction_modified_arr():
     """Returns a reaction with modified Arrhenius reaction rate coefficient."""
-    return IrreversibleElementaryReaction(rxn_type="Elementary",
+    return IrrevElemReaction(rxn_type="Elementary",
                                 is_reversible=False,
                                 rxn_equation="H2 + OH =] H2O + H",
                                 species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
@@ -136,9 +136,9 @@ def test_irrev_reaction_modified_arr():
                                 product_stoich_coeffs={'H2O' :1, 'H':1})
 
 def test_wrongly_classified_irrev_rxn_reversible():
-    """Test initializing wrongly classified IrreversibleElementaryReaction (actually reversible)"""
-    with pytest.raises(IrreversibleElementaryReactionError):
-        test = IrreversibleElementaryReaction(rxn_type="Elementary",
+    """Test initializing wrongly classified IrrevElemReaction (actually reversible)"""
+    with pytest.raises(IrrevElemReactionError):
+        test = IrrevElemReaction(rxn_type="Elementary",
                                     is_reversible=True,
                                     rxn_equation="H2 + OH =] H2O + H",
                                     species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
@@ -147,9 +147,9 @@ def test_wrongly_classified_irrev_rxn_reversible():
                                     product_stoich_coeffs={'H2O' :1, 'H':1})
 
 def test_wrongly_classified_irrev_rxn_nonElementary():
-    """Test initializing wrongly classified IrreversibleElementaryReaction (actually non-elementary)"""
-    with pytest.raises(IrreversibleElementaryReactionError):
-        test = IrreversibleElementaryReaction(rxn_type="Non-elementary",
+    """Test initializing wrongly classified IrrevElemReaction (actually non-elementary)"""
+    with pytest.raises(IrrevElemReactionError):
+        test = IrrevElemReaction(rxn_type="Non-elementary",
                                     is_reversible=False,
                                     rxn_equation="H2 + OH =] H2O + H",
                                     species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
@@ -170,7 +170,7 @@ def test_IrrevReaction_compute_reaction_rate_coeff_constant(test_irrev_reaction)
 def test_IrrevReaction_compute_reaction_rate_coeff_invalid_constant():
     """Test reaction constant reaction rate coefficient
     but invalid constant (non-positive)"""
-    test_rxn = IrreversibleElementaryReaction(rxn_type="Elementary",
+    test_rxn = IrrevElemReaction(rxn_type="Elementary",
                                     is_reversible=False,
                                     rxn_equation="H2 + OH =] H2O + H",
                                     species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
@@ -203,7 +203,7 @@ def test_IrrevReaction_compute_reaction_rate_coeff_mod_arrhenius(test_irrev_reac
 def test_IrrevReaction_compute_progress_rate():
     """Test compute_progress_rate() for an elementary,
     irreversible reaction."""
-    test = IrreversibleElementaryReaction(rxn_type="Elementary",
+    test = IrrevElemReaction(rxn_type="Elementary",
                                 is_reversible=False,
                                 rxn_equation="A + B =] C",
                                 species_list=['A', 'B', 'C'],
@@ -219,7 +219,7 @@ def test_IrrevReaction_compute_progress_rate():
 def test_IrrevReaction_compute_reaction_rate(test_irrev_reaction):
     """Test compute_reaction_rate() for an elementary,
     irreversible reaction."""
-    test = IrreversibleElementaryReaction(rxn_type="Elementary",
+    test = IrrevElemReaction(rxn_type="Elementary",
                                 is_reversible=False,
                                 rxn_equation="A + B =] C",
                                 species_list=['A', 'B', 'C'],
@@ -233,7 +233,7 @@ def test_IrrevReaction_compute_reaction_rate(test_irrev_reaction):
 
 def test_IrrevReaction_compute_reaction_rate_neg_reactant_stoich_coeffs(test_irrev_reaction):
     """Test compute_reaction_rate() for an elementary, irreversible reaction."""
-    test = IrreversibleElementaryReaction(rxn_type="Elementary",
+    test = IrrevElemReaction(rxn_type="Elementary",
                                 is_reversible=False,
                                 rxn_equation="A + B =] C",
                                 species_list=['A', 'B', 'C'],
@@ -246,7 +246,7 @@ def test_IrrevReaction_compute_reaction_rate_neg_reactant_stoich_coeffs(test_irr
     
 def test_IrrevReaction_compute_reaction_rate_neg_product_stoich_coeffs(test_base_reaction):
     """Test compute_reaction_rate() for an elementary, irreversible reaction."""
-    test = IrreversibleElementaryReaction(rxn_type="Elementary",
+    test = IrrevElemReaction(rxn_type="Elementary",
                                 is_reversible=False,
                                 rxn_equation="A + B =] C",
                                 species_list=['A', 'B', 'C'],
@@ -273,7 +273,7 @@ def test_IrrevReaction_compute_reaction_rate_neg_product_stoich_coeffs(test_base
 @pytest.fixture
 def test_rev_reaction():
     """Returns a valid reaction (from rev_rxn.xml)"""
-    return ReversibleElementaryReaction(rxn_type="Elementary",
+    return RevElemReaction(rxn_type="Elementary",
                     is_reversible=True,
                     rxn_equation="H + O2 [=] H2O ",
                     species_list=['H', 'H2O', 'O2'],
@@ -282,9 +282,9 @@ def test_rev_reaction():
                     product_stoich_coeffs={'H2O' :2})
 
 def test_wrongly_classified_rev_rxn_irreversible():
-    """Tests initializing wrongly classified ReversibleElementaryReaction (actually irreversible)"""
-    with pytest.raises(ReversibleElementaryReactionError):
-        test = ReversibleElementaryReaction(rxn_type="Elementary",
+    """Tests initializing wrongly classified RevElemReaction (actually irreversible)"""
+    with pytest.raises(RevElemReactionError):
+        test = RevElemReaction(rxn_type="Elementary",
                                     is_reversible=False,
                                     rxn_equation="H2 + OH =] H2O + H",
                                     species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
@@ -293,9 +293,9 @@ def test_wrongly_classified_rev_rxn_irreversible():
                                     product_stoich_coeffs={'H2O' :1, 'H':1})
 
 def test_wrongly_classified_rev_rxn_nonElementary():
-    """Tests initializing wrongly classified ReversibleElementaryReaction (actually non-elementary)"""
-    with pytest.raises(ReversibleElementaryReactionError):
-        test = ReversibleElementaryReaction(rxn_type="Non-elementary",
+    """Tests initializing wrongly classified RevElemReaction (actually non-elementary)"""
+    with pytest.raises(RevElemReactionError):
+        test = RevElemReaction(rxn_type="Non-elementary",
                                     is_reversible=True,
                                     rxn_equation="H2 + OH =] H2O + H",
                                     species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],

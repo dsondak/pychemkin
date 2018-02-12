@@ -1,14 +1,12 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*- 
 
 """Module for setting up reaction system."""
 
 import numpy
 
-from pychemkin.reactions.Reactions import ElementaryReaction
+from pychemkin.reactions.Reactions import *
 from pychemkin.rxn_rate_coefficients.rxn_rate_coefficients import ReactionCoeff
 
-from scipy.integrate import ode
+# from scipy.integrate import ode
 
 class ReactionSystemError(Exception):
     """Class for ReactionSystem-related errors."""
@@ -52,14 +50,14 @@ class ReactionSystem(object):
             r.set_concentrations(concentrations)
             r.set_temperature(self.temperature)
             
-            if isinstance(r, Reactions.ReversibleReaction):
+            if isinstance(r, RevElemReaction):
                 r.set_NASA_poly_coefs(self.NASA_matrix)
 
 
-        self.concentrations = reaction_list[0].concentrations
-        # ODE integrator possible choices of solver: dopri5, dop853(both are explicit ruggi-kutta method) vode, zvode
-        self.r = ode(self.compute_reaction_rate).set_integrator("dop853")
-        self.r.set_initial_value(self.concentrations, 0)
+        # self.concentrations = reaction_list[0].concentrations
+        # # ODE integrator possible choices of solver: dopri5, dop853(both are explicit ruggi-kutta method) vode, zvode
+        # self.r = ode(self.compute_reaction_rate).set_integrator("dop853")
+        # self.r.set_initial_value(self.concentrations, 0)
 
 
     def get_reaction_rate(self):
@@ -109,7 +107,6 @@ class ReactionSystem(object):
         """
 
         NASA = {}
-        
         for specie in NASA_poly_coef:
             specie_dict = NASA_poly_coef[specie]
             if self.temperature <= specie_dict["Tmid"]: # get the low temperature
@@ -119,41 +116,40 @@ class ReactionSystem(object):
         return NASA
 
 
-    def compute_reaction_rate(self, a, concentrations):
-        '''
-        Ordinary differential equation for the ODE solver. It gets the current concentration,
-        modifies the concentration in each reaction and computes the current reaction rate(first-order derivative)
-        INPUTS:
-        -------
-        a : float
-            placeholder of time to match the format of the ode solver.
-            In our ODE the derivative doesn't depend on the current time, but only on the current state(concentration)
-        concentration: list[float]
-            current state (current concentration)
+    # def compute_reaction_rate(self, a, concentrations):
+    #     '''
+    #     Ordinary differential equation for the ODE solver. It gets the current concentration,
+    #     modifies the concentration in each reaction and computes the current reaction rate(first-order derivative)
+    #     INPUTS:
+    #     -------
+    #     a : float
+    #         placeholder of time to match the format of the ode solver.
+    #         In our ODE the derivative doesn't depend on the current time, but only on the current state(concentration)
+    #     concentration: list[float]
+    #         current state (current concentration)
 
-        RETURNS:
-        --------
-        self.get_reaction_rate() : tuple
-            current reaction rate
-        '''
-        #update the concentration of the species in each reaction and also in the system
-        for r in self.reaction_list:
-            r.set_concentrations_from_array(concentrations)
-        self.concentrations = concentrations
-        return self.get_reaction_rate()
+    #     RETURNS:
+    #     --------
+    #     self.get_reaction_rate() : tuple
+    #         current reaction rate
+    #     '''
+    #     #update the concentration of the species in each reaction and also in the system
+    #     for r in self.reaction_list:
+    #         r.set_concentrations_from_array(concentrations)
+    #     self.concentrations = concentrations
+    #     return self.get_reaction_rate()
 
+    # def step(self, dt):
+    #     """Solve the ODE， get the state after dt time
 
-    def step(self, dt):
-        """Solve the ODE， get the state after dt time
+    #     INPUTS:
+    #     -------
+    #     dt : float
+    #         timestep of the next state
 
-        INPUTS:
-        -------
-        dt : float
-            timestep of the next state
-
-        RETURNS:
-        --------
-        (self.r.t, self.r.y) : tuple
-            current time and current concentration"""
-        self.r.integrate(self.r.t + dt)
-        return self.r.t, self.r.y
+    #     RETURNS:
+    #     --------
+    #     (self.r.t, self.r.y) : tuple
+    #         current time and current concentration"""
+    #     self.r.integrate(self.r.t + dt)
+    #     return self.r.t, self.r.y

@@ -247,28 +247,27 @@ class ElementaryReaction(object):
                                 compute the reaction rate coefficients and progress rates!''')
 
 
-class IrreversibleElementaryReactionError(Exception):
+class IrrevElemReactionError(Exception):
     """Error for misclassified IrreversibleElementaryReaction."""
     pass
 
-class IrreversibleElementaryReaction(ElementaryReaction):
+class IrrevElemReaction(ElementaryReaction):
     """Class for irreversible elementary reaction"""
     def __init__(self, rxn_type, is_reversible, rxn_equation, species_list, rate_coeffs_components,
                  reactant_stoich_coeffs, product_stoich_coeffs):
-        """Initializes IrreversibleElementaryReaction.
+        """Initializes reaction that is irreversible and elementary.
 
         NOTES:
         ------
         PRE:
-            - Raises IrreversibleElementaryReactionError if reaction type is not irreversible OR if reaction
+            - Raises IrrevElemReactionError if reaction type is not irreversible OR if reaction
                 is not elementary (must satisfy both!)
         """
-        super(IrreversibleElementaryReaction, self).__init__(rxn_type, is_reversible, rxn_equation,
-                                                   species_list, rate_coeffs_components,
-                                                   reactant_stoich_coeffs, product_stoich_coeffs)
-
+        super(IrrevElemReaction, self).__init__(rxn_type, is_reversible, rxn_equation,
+                                                species_list, rate_coeffs_components,
+                                                reactant_stoich_coeffs, product_stoich_coeffs)
         if not (rxn_type == "Elementary" and is_reversible == False):
-            raise IrreversibleElementaryReactionError("This reaction is not irreversible nor elementary!") 
+            raise IrrevElemReactionError("This reaction is not irreversible nor elementary!") 
 
     def compute_reaction_rate_coeff(self, T=None):
         """Computes reaction rate coefficients of reaction.
@@ -322,30 +321,31 @@ class IrreversibleElementaryReaction(ElementaryReaction):
         return progress_rate
 
 
-class ReversibleElementaryReactionError(Exception):
+class RevElemReactionError(Exception):
     """Error for misclassified ReversibleElementaryReaction."""
     pass
 
-class ReversibleElementaryReaction(ElementaryReaction):
+class RevElemReaction(ElementaryReaction):
     """Class for reversible reaction"""
     def __init__(self, rxn_type, is_reversible, rxn_equation, species_list, rate_coeffs_components,
                  reactant_stoich_coeffs, product_stoich_coeffs):
-        """Initializes ReversibleElementaryReaction.
+        """Initializes reaction that is reversible and elementary.
 
         NOTES:
         ------
         PRE:
-            - Raises ReversibleElementaryReactionError if reaction type is not reversible OR if reaction
+            - Raises RevElemReactionError if reaction type is not reversible OR if reaction
                 is not elementary (must satisfy both!)
         """
-        super(ReversibleElementaryReaction, self).__init__(rxn_type, is_reversible, rxn_equation, species_list, rate_coeffs_components,
-                 reactant_stoich_coeffs, product_stoich_coeffs)
+        super(RevElemReaction, self).__init__(rxn_type, is_reversible, rxn_equation,
+                                              species_list, rate_coeffs_components,
+                                              reactant_stoich_coeffs, product_stoich_coeffs)
 
         self.NASA_poly_coefs_dict = None
         self.NASA_poly_coefs = None
 
         if not (rxn_type == "Elementary" and is_reversible == True):
-            raise ReversibleElementaryReactionError("This reaction is not reversible nor elementary!") 
+            raise RevElemReactionError("This reaction is not reversible nor elementary!") 
 
     def compute_reaction_rate_coeff(self, T=None):
         """Computes reaction rate coefficients of reaction.
