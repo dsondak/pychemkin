@@ -1,7 +1,7 @@
 language: python
 warnings_are_errors: false
 python:
-    - "3.6"
+    - "3.5"
 before_install:
     - pip install pytest pytest-cov
     - pip install coveralls
