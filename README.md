@@ -1,6 +1,6 @@
 # pychemkin
 
-[![Build Status](https://travis-ci.org/dsondak/pychemkin.svg?branch=database)](https://travis-ci.org/dsondak/pychemkin.svg?branch=develop)
+[![Build Status](https://travis-ci.org/dsondak/pychemkin.svg?branch=database)](https://travis-ci.org/dsondak/pychemkin.svg?branch=database)
 [![Coverage Status](https://coveralls.io/repos/github/dsondak/pychemkin/badge.svg?branch=database)](https://coveralls.io/github/dsondak/pychemkin?branch=database)
 
 A chemical kinetics library written in `Python`.  
