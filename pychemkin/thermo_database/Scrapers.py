@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import pytest 
 
 class Scraper_7_coeffs:
     """
