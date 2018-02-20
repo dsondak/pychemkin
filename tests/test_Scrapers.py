@@ -18,7 +18,8 @@ class Test_Scrapers():
         """
         test7 = Scraper_7_coeffs()
         # The following method scrape_coeffs() implicitly calls scrape_url() and create_soup_object()
-        table = test7.scrape_coeffs()
+        with pytest.warns(DeprecationWarning):
+            table = test7.scrape_coeffs()
         
         #Test that the server response to the parser was 200.
         assert str(test7.web_page.__repr__) == "<bound method Response.__repr__ of <Response [200]>>"
