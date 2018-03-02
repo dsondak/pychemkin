@@ -8,6 +8,7 @@ from xml.dom import minidom
 import sqlite3
 import numpy as np
 import pandas as pd
+import json
 
 class Parser_7_coeffs:
     """
@@ -152,6 +153,43 @@ class Parser_7_coeffs:
 
         result = self.prettify(root)
         f = open("7poly.xml","w")
+        f.write(result)
+        f.close()
+
+        return result
+
+    def molec_weights_to_xml(self):
+        
+        #create root for xml file
+        root = Element('SpecieMolecularWeights')
+        root.set('id','Species Molecular Weights')
+        comment = Comment('Created by Filip Michalsky')
+        root.append(comment)
+        
+        with open('Molecular_weights.txt', 'r') as fp:
+            data = json.load(fp)
+
+        for key in data:
+            #create a specie entry in xml
+            specie = Element('specie')
+            specie.set('name',key)
+            
+            #specie.set('state',str(k[1]))
+            #specie.set('Mweight','N/A')
+            #thermo = SubElement(specie, 'thermo')
+
+            WEIGHT = SubElement(specie, 'Weight')
+            #WEIGHT.set('Value',str(data[key]))
+            WEIGHT.text = str(data[key])
+            #weight_specie = SubElement(specie, 'weight')
+            #weight_specie.text = ('name',"data")
+
+            #add specie to root
+            root.append(specie)
+            
+        #print(root)
+        result = self.prettify(root)
+        f = open("Molec_weights.xml","w")
         f.write(result)
         f.close()
 
