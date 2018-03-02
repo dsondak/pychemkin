@@ -146,5 +146,5 @@ class Parser_7_coeffs:
 
             #add specie to root
             root.append(specie)
-            
-        return prettify(root))
+
+        return prettify(root)
