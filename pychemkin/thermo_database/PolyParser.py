@@ -157,7 +157,7 @@ class Parser_7_coeffs:
         f.close()
 
         return result
-
+    
     def molec_weights_to_xml(self):
         
         #create root for xml file
@@ -193,8 +193,8 @@ class Parser_7_coeffs:
         f.write(result)
         f.close()
 
-        return result
-
+        return root
+    
     def create_tables(self):
         pd.set_option('display.width', 500)
         pd.set_option('display.max_columns', 100)
@@ -204,6 +204,7 @@ class Parser_7_coeffs:
         self.cursor = db.cursor()
         self.cursor.execute("DROP TABLE IF EXISTS LOW")
         self.cursor.execute("DROP TABLE IF EXISTS HIGH")
+        self.cursor.execute("DROP TABLE IF EXISTS WEIGHTS")
         self.cursor.execute("PRAGMA foreign_keys=1")
 
         #Create High and Low tables
@@ -236,12 +237,18 @@ class Parser_7_coeffs:
                        COEFF_6 TEXT NOT NULL,
                        COEFF_7 TEXT NOT NULL)''')
         db.commit()
+        self.cursor.execute('''CREATE TABLE WEIGHTS (
+                       SPECIES_NAME TEXT NOT NULL,
+                       MOLEC_WEIGHT TEXT NOT NULL)''')
 
+        # Commit changes to the database
+        db.commit()
     def species_xml_to_db(self):
         #create xml & db
-        self.species_dict_to_xml()
         self.create_tables()
-
+        self.species_dict_to_xml()
+        self.molec_weights_to_xml()
+        
         #Get the xml
         tree = ET.parse('7poly.xml')
         root = tree.getroot()
@@ -283,5 +290,20 @@ class Parser_7_coeffs:
                           (SPECIES_NAME, STATE, TLOW, THIGH, COEFF_1, COEFF_2,COEFF_3,COEFF_4,COEFF_5,COEFF_6,COEFF_7)
                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', high_to_insert)
 
+        ### Insert table of molecular weights
+        tree = ET.parse('Molec_weights.xml')
+        root = tree.getroot()
+        #get species
+        species = root.findall('specie')
+
+        for specie in species:
+            name = specie.get('name')
+            weight = specie.find('Weight')
+            val = weight.text
+            vals_to_insert = name,val
+            self.cursor.execute('''INSERT INTO WEIGHTS
+                                  (SPECIES_NAME, MOLEC_WEIGHT)
+                                  VALUES (?, ?)''', vals_to_insert)
+        db.commit()
     def create_sql_db(self):
           self.species_xml_to_db()
