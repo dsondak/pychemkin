@@ -192,6 +192,7 @@ class XMLParser:
                     if rateCoeff.find('b') is not None:
                         raise ValueError("Cannot use 'b' in Arrhenius type.")
 
+            #elif rateCoeff.tag == 'modifiedArrhenius':
             elif rateCoeff.tag in ('modifiedArrhenius',
                                    'Kooij'):
                 kooij_name = ''
@@ -224,12 +225,12 @@ class XMLParser:
                                                       " not implemented.")
                     E_conversion = numpy.prod(numpy.array(E_conv_lis))
                     try:
-                        A = float(rateCoeff.find('A').text)*A_conversion
+                        A = float(rateCoeff.find('A').text) * A_conversion
                         b = float(rateCoeff.find('b').text)
-                        E = float(rateCoeff.find('E').text)*E_conversion
+                        E = float(rateCoeff.find('E').text) * E_conversion
                         d = {'A': A, 'b': b, 'E': E}
-                        if rateCoeff.tag == 'Kooij':
-                            d['name'] = kooij_name
+                        # if rateCoeff.tag == 'Kooij':
+                        #     d['name'] = kooij_name
                     except:
                         print("Conversion failed. " +
                               "Resulting units have not been converted.")
@@ -237,8 +238,8 @@ class XMLParser:
                         b = float(rateCoeff.find('b').text)
                         E = float(rateCoeff.find('E').text)
                         d = {'A': A, 'b': b, 'E': E}
-                        if rateCoeff.tag == 'Kooij':
-                            d['name'] = kooij_name
+                        # if rateCoeff.tag == 'Kooij':
+                        #     d['name'] = kooij_name
                 # If 'modifiedArrhenius' units are not to be converted
                 if not self.convert_units:
                     try:
@@ -246,8 +247,8 @@ class XMLParser:
                         b = float(rateCoeff.find('b').text)
                         E = float(rateCoeff.find('E').text)
                         d = {'A': A, 'b': b, 'E': E}
-                        if rateCoeff.tag == 'Kooij':
-                            d['name'] = kooij_name
+                        # if rateCoeff.tag == 'Kooij':
+                        #     d['name'] = kooij_name
                     except:
                         raise ValueError("Reaction coefficient parameters " +
                                          "not as expected.")
@@ -259,26 +260,26 @@ class XMLParser:
                 except:
                     raise ValueError("Non-numeric coefficient parameters.")
 
-            elif rateCoeff.tag == 'efficiencies':
-                temp_list = [item.split(':') for item
-                             in rateCoeff.text.split(' ')]
-                efficiencies = dict()
-                efficiencies['Type'] = 'efficiencies'
-                for item in temp_list:
-                    efficiencies[item[0]] = item[1]
-                efficiencies['default'] = rateCoeff.attrib['default']
-                d = efficiencies
+            # elif rateCoeff.tag == 'efficiencies':
+            #     temp_list = [item.split(':') for item
+            #                  in rateCoeff.text.split(' ')]
+            #     efficiencies = dict()
+            #     efficiencies['Type'] = 'efficiencies'
+            #     for item in temp_list:
+            #         efficiencies[item[0]] = item[1]
+            #     efficiencies['default'] = rateCoeff.attrib['default']
+            #     d = efficiencies
 
-            elif rateCoeff.tag == 'Troe':
-                alpha = float(rateCoeff.find('alpha').text)
-                t1 = float(rateCoeff.find('T1').text)
-                t2 = float(rateCoeff.find('T2').text)
-                t3 = float(rateCoeff.find('T2').text)
+            # elif rateCoeff.tag == 'Troe':
+            #     alpha = float(rateCoeff.find('alpha').text)
+            #     t1 = float(rateCoeff.find('T1').text)
+            #     t2 = float(rateCoeff.find('T2').text)
+            #     t3 = float(rateCoeff.find('T2').text)
 
-                d = {'alpha': alpha,
-                     't1': t1,
-                     't2': t2,
-                     't3': t3}
+            #     d = {'alpha': alpha,
+            #          't1': t1,
+            #          't2': t2,
+            #          't3': t3}
 
             else:
                 raise NotImplementedError(rateCoeff.tag + " not implemented.")
