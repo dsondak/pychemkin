@@ -109,3 +109,9 @@ def test_const_k():
         xml_filename = "tests/test_xml_files/k_const.xml"
         parser = XMLParser(xml_filename)
 
+# def test_threebody_params():
+#     xml_filename = "tests/test_xml_files/rxn_ThreeBody.xml"
+#     parser = XMLParser(xml_filename, convert_units=True)
+#     params = {'A': 38000000000.0, 'b': -2.0, 'E': 0.0, 'name': None}
+#     assert (parser.reaction_list[0].rate_coeffs_components == params)
+

@@ -1,16 +1,18 @@
 
 """Classes for preprocessing: parsing xml files, identifying reaction type."""
 
+import csv
 import numpy
 import os
 import xml.etree.ElementTree as ET
+from pychemkin.config import THIS_DIRECTORY
 from pychemkin.reactions.Reactions import *
 
 
 class XMLParser:
     """Parser for input XML files to retrieve and
     preprocess reaction data."""
-    def __init__(self, xml_filename):
+    def __init__(self, xml_filename, convert_units=False):
         """Initializes parser for input XML files.
         
         Args:
@@ -41,6 +43,7 @@ class XMLParser:
 
         self.reaction_list = []
         self.species = {}
+        self.convert_units = convert_units
         self.get_species()
         self.populate_reaction_list()
 
@@ -117,57 +120,172 @@ class XMLParser:
         =====
         reaction : xml.etree.ElementTree.Element, required
             <reaction> XML element containing information about a reaction
-        
+        convert_units : boolean, optional (default False)
+            converts units if True
+
+
         RETURNS:
         --------
         rate_coeffs_components : dict
             dictionary of the form {coefficient component name: coefficient component value}. 
         """
-        for coeff in reaction.findall('rateCoeff'):
+        if self.convert_units:
+            # Connect to csv file containing units
+            units_file = os.path.join(THIS_DIRECTORY, 'units.csv')
+            with open(units_file, 'r') as unit:
+                next(unit)
+                unit_dict = dict(csv.reader(unit))
+            # Create dictionary of units
+            dict_ = dict((k, float(v)) for k, v in unit_dict.items())
 
-            # constant-type
-            if coeff.find('Constant') is not None:
-                for arr in coeff.findall('Constant'):
-                    if arr.find('k') is None or arr.find('k').text is None:
-                        raise ValueError("Missing component 'k' for constant type rxn rate coefficient.")
-                    else:
-                        k = float(arr.find('k').text)
-                rate_coeffs_components = {"k": k}
+        # Loop over rateCoeff's and convert units where desired
+        rateCoeffs = reaction.find('rateCoeff')
 
-            # Arrhenius-type
-            elif coeff.find('Arrhenius') is not None:
-                for arr in coeff.findall('Arrhenius'):
-                    if arr.find('A') is None or arr.find('A').text is None:
-                        raise ValueError("Missing component 'A' for modified Arrhenius type rxn rate coefficient.")
-                    else:
-                        A = float(arr.find('A').text)
-                    if arr.find('E') is None or arr.find('E').text is None:
-                        raise ValueError("Missing component 'E' for modified Arrhenius type rxn rate coefficient.")
-                    else:
-                        E = float(arr.find('E').text)
-                rate_coeffs_components = {"A": A, "E": E}
+        #output = []
+        for rateCoeff in rateCoeffs:
+            if rateCoeff.tag == 'Arrhenius':
+                # If 'Arrhenius' units are to be converted
+                if self.convert_units:
+                    try:
+                        A_unit = rateCoeff.find('A').attrib['units'].split('/')
+                        E_unit = rateCoeff.find('E').attrib['units'].split('/')
+                    except:
+                        raise ValueError("Input file contains no units. " + 
+                                         "Set convert_units to False to continue")
+                    A_conv_lis = []
+                    for unit in A_unit:
+                        try:
+                            A_conv_lis.append(dict_[unit])
+                        except:
+                            raise NotImplementedError(unit +
+                                                      " not implemented.")
+                    A_conversion = numpy.prod(numpy.array(A_conv_lis))
+                    E_conv_lis = []
+                    for unit in E_unit:
+                        try:
+                            E_conv_lis.append(dict_[unit])
+                        except:
+                            raise NotImplementedError(unit +
+                                                      " not implemented.")
+                    E_conversion = numpy.prod(numpy.array(E_conv_lis))
+                    try:
+                        A = float(rateCoeff.find('A').text)*A_conversion
+                        E = float(rateCoeff.find('E').text)*E_conversion
+                        d = {'A': A, 'E': E}
+                    except:
+                        print("Conversion failed. " +
+                              "Resulting units have not been converted.")
+                        A = float(rateCoeff.find('A').text)
+                        E = float(rateCoeff.find('E').text)
+                        d = {'A': A, 'E': E}
+                    if rateCoeff.find('b') is not None:
+                        raise ValueError("Cannot use 'b' in Arrhenius type.")
+                # If 'Arrhenius' units are not to be converted
+                if not self.convert_units:
+                    try:
+                        A = float(rateCoeff.find('A').text)
+                        E = float(rateCoeff.find('E').text)
+                        d = {'A': A, 'E': E}
+                    except:
+                        raise ValueError("Reaction coefficient parameters " +
+                                         "not as expected.")
+                    if rateCoeff.find('b') is not None:
+                        raise ValueError("Cannot use 'b' in Arrhenius type.")
 
-            # modified Arrhenius-type
-            elif coeff.find('modifiedArrhenius') is not None:
-                for arr in coeff.findall('modifiedArrhenius'):
-                    if arr.find('A') is None or arr.find('A').text is None:
-                        raise ValueError("Missing component 'A' for modified modified Arrhenius type rxn rate coefficient.")
-                    else:
-                        A = float(arr.find('A').text)
-                    if arr.find('b') is None or arr.find('b').text is None:
-                        raise ValueError("Missing component 'b' for modified modified Arrhenius type rxn rate coefficient.")
-                    else:
-                        b = float(arr.find('b').text)
-                    if arr.find('E') is None or arr.find('E').text is None:
-                        raise ValueError("Missing component 'E' for modified modified Arrhenius type rxn rate coefficient.")
-                    else:
-                        E = float(arr.find('E').text)
-                rate_coeffs_components = {"A": A, "b": b, "E": E}
+            elif rateCoeff.tag in ('modifiedArrhenius',
+                                   'Kooij'):
+                kooij_name = ''
+                try:
+                    kooij_name = rateCoeff.attrib['name']
+                except:
+                    kooij_name = None
+                # If 'modifiedArrhenius' units are to be converted
+                if self.convert_units:
+                    try:
+                        A_unit = rateCoeff.find('A').attrib['units'].split('/')
+                        E_unit = rateCoeff.find('E').attrib['units'].split('/')
+                    except:
+                        raise ValueError("Input file contains no units. " + 
+                                         "Set convert_units to False to continue")
+                    A_conv_lis = []
+                    for unit in A_unit:
+                        try:
+                            A_conv_lis.append(dict_[unit])
+                        except:
+                            raise NotImplementedError(unit +
+                                                      " not implemented.")
+                    A_conversion = numpy.prod(numpy.array(A_conv_lis))
+                    E_conv_lis = []
+                    for unit in E_unit:
+                        try:
+                            E_conv_lis.append(dict_[unit])
+                        except:
+                            raise NotImplementedError(unit +
+                                                      " not implemented.")
+                    E_conversion = numpy.prod(numpy.array(E_conv_lis))
+                    try:
+                        A = float(rateCoeff.find('A').text)*A_conversion
+                        b = float(rateCoeff.find('b').text)
+                        E = float(rateCoeff.find('E').text)*E_conversion
+                        d = {'A': A, 'b': b, 'E': E}
+                        if rateCoeff.tag == 'Kooij':
+                            d['name'] = kooij_name
+                    except:
+                        print("Conversion failed. " +
+                              "Resulting units have not been converted.")
+                        A = float(rateCoeff.find('A').text)
+                        b = float(rateCoeff.find('b').text)
+                        E = float(rateCoeff.find('E').text)
+                        d = {'A': A, 'b': b, 'E': E}
+                        if rateCoeff.tag == 'Kooij':
+                            d['name'] = kooij_name
+                # If 'modifiedArrhenius' units are not to be converted
+                if not self.convert_units:
+                    try:
+                        A = float(rateCoeff.find('A').text)
+                        b = float(rateCoeff.find('b').text)
+                        E = float(rateCoeff.find('E').text)
+                        d = {'A': A, 'b': b, 'E': E}
+                        if rateCoeff.tag == 'Kooij':
+                            d['name'] = kooij_name
+                    except:
+                        raise ValueError("Reaction coefficient parameters " +
+                                         "not as expected.")
+
+            elif rateCoeff.tag == 'Constant':
+                try:
+                    k = float(rateCoeff.find('k').text)
+                    d = {'k': k}
+                except:
+                    raise ValueError("Non-numeric coefficient parameters.")
+
+            elif rateCoeff.tag == 'efficiencies':
+                temp_list = [item.split(':') for item
+                             in rateCoeff.text.split(' ')]
+                efficiencies = dict()
+                efficiencies['Type'] = 'efficiencies'
+                for item in temp_list:
+                    efficiencies[item[0]] = item[1]
+                efficiencies['default'] = rateCoeff.attrib['default']
+                d = efficiencies
+
+            elif rateCoeff.tag == 'Troe':
+                alpha = float(rateCoeff.find('alpha').text)
+                t1 = float(rateCoeff.find('T1').text)
+                t2 = float(rateCoeff.find('T2').text)
+                t3 = float(rateCoeff.find('T2').text)
+
+                d = {'alpha': alpha,
+                     't1': t1,
+                     't2': t2,
+                     't3': t3}
 
             else:
-                raise NotImplementedError("This reaction rate coefficient type has not been handled!")
+                raise NotImplementedError(rateCoeff.tag + " not implemented.")
 
-            return rate_coeffs_components
+            #output.append(d)
+        #return output
+        return d
 
     def get_reactant_stoich_coeffs(self, reaction):
         """Helper function that returns reactant stoichiometric coefficients from input reaction.
