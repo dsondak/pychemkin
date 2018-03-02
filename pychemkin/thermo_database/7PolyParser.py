@@ -163,14 +163,15 @@ class Parser_7_coeffs:
         pd.set_option('display.notebook_repr_html', True)
 
         db = sqlite3.connect('7Poly.sqlite')
-        cursor = db.cursor()
-        cursor.execute("DROP TABLE IF EXISTS LOW")
-        cursor.execute("DROP TABLE IF EXISTS HIGH")
-        cursor.execute("PRAGMA foreign_keys=1")
+        self.cursor = db.cursor()
+        self.cursor.execute("DROP TABLE IF EXISTS LOW")
+        self.cursor.execute("DROP TABLE IF EXISTS HIGH")
+        self.cursor.execute("PRAGMA foreign_keys=1")
 
         #Create High and Low tables
-        cursor.execute('''CREATE TABLE LOW (
+        self.cursor.execute('''CREATE TABLE LOW (
                        SPECIES_NAME TEXT NOT NULL,
+                       STATE TEXT NOT NULL,
                        TLOW TEXT NOT NULL,
                        THIGH TEXT NOT NULL,
                        COEFF_1 TEXT NOT NULL,
@@ -184,8 +185,9 @@ class Parser_7_coeffs:
 
         # Commit changes to the database
         db.commit()
-        cursor.execute('''CREATE TABLE HIGH (
+        self.cursor.execute('''CREATE TABLE HIGH (
                        SPECIES_NAME TEXT NOT NULL,
+                       STATE TEXT NOT NULL,
                        TLOW TEXT NOT NULL,
                        THIGH TEXT NOT NULL,
                        COEFF_1 TEXT NOT NULL,
@@ -211,6 +213,7 @@ class Parser_7_coeffs:
 
         for specie in species:
             name = specie.get('name')
+            state = specie.get('state')
 
             #get low temp high/low and coeffs for each specie
             NASA = specie.find('thermo').findall('NASA')
@@ -223,24 +226,24 @@ class Parser_7_coeffs:
             lows = NASA[0].find('floatArray').text.split()
             if(len(lows) > 7):
                 Low_C_1,Low_C_2,Low_C_3,Low_C_4,Low_C_5,Low_C_6,Low_C_7,Low_C_8 = lows[0:8]
-                lows_to_insert = (name,low_tmin,low_tmax,Low_C_1.strip(','),Low_C_2.strip(','),Low_C_3.strip(','),Low_C_4.strip(','),Low_C_5.strip(','),Low_C_6.strip(','),Low_C_7.strip(','),Low_C_8.strip(','))
+                lows_to_insert = (name,state,low_tmin,low_tmax,Low_C_1.strip(','),Low_C_2.strip(','),Low_C_3.strip(','),Low_C_4.strip(','),Low_C_5.strip(','),Low_C_6.strip(','),Low_C_7.strip(','),Low_C_8.strip(','))
             else:
                 Low_C_1,Low_C_2,Low_C_3,Low_C_4,Low_C_5,Low_C_6,Low_C_7 = lows[0:7]
-                lows_to_insert = (name,low_tmin,low_tmax,Low_C_1.strip(','),Low_C_2.strip(','),Low_C_3.strip(','),Low_C_4.strip(','),Low_C_5.strip(','),Low_C_6.strip(','),Low_C_7.strip(','),"")
+                lows_to_insert = (name,state,low_tmin,low_tmax,Low_C_1.strip(','),Low_C_2.strip(','),Low_C_3.strip(','),Low_C_4.strip(','),Low_C_5.strip(','),Low_C_6.strip(','),Low_C_7.strip(','),"")
 
             #get low info
             high_tmax = NASA[1].get('Tmax')
             high_tmin = NASA[1].get('Tmin')
             High_C_1,High_C_2,High_C_3,High_C_4,High_C_5,High_C_6,High_C_7 = NASA[1].find('floatArray').text.strip(',').split()[0:7]
-            high_to_insert = name,high_tmin,high_tmax,High_C_1.strip(','),High_C_2.strip(','),High_C_3.strip(','),High_C_4.strip(','),High_C_5.strip(','),High_C_6.strip(','),High_C_7.strip(',')
+            high_to_insert = name,state,high_tmin,high_tmax,High_C_1.strip(','),High_C_2.strip(','),High_C_3.strip(','),High_C_4.strip(','),High_C_5.strip(','),High_C_6.strip(','),High_C_7.strip(',')
 
             #Insert the values for each species into table
-            cursor.execute('''INSERT INTO LOW
-                          (SPECIES_NAME, TLOW, THIGH, COEFF_1, COEFF_2,COEFF_3,COEFF_4,COEFF_5,COEFF_6,COEFF_7, COEFF_8)
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', lows_to_insert)
-            cursor.execute('''INSERT INTO HIGH
-                          (SPECIES_NAME, TLOW, THIGH, COEFF_1, COEFF_2,COEFF_3,COEFF_4,COEFF_5,COEFF_6,COEFF_7)
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', high_to_insert)
+            self.cursor.execute('''INSERT INTO LOW
+                          (SPECIES_NAME, STATE, TLOW, THIGH, COEFF_1, COEFF_2,COEFF_3,COEFF_4,COEFF_5,COEFF_6,COEFF_7, COEFF_8)
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', lows_to_insert)
+            self.cursor.execute('''INSERT INTO HIGH
+                          (SPECIES_NAME, STATE, TLOW, THIGH, COEFF_1, COEFF_2,COEFF_3,COEFF_4,COEFF_5,COEFF_6,COEFF_7)
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', high_to_insert)
 
     def create_sql_db(self):
           self.species_xml_to_db()
