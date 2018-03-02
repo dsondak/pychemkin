@@ -5,6 +5,9 @@ from xml.etree.ElementTree import Element, SubElement, Comment
 from xml.etree.ElementTree import XMLID
 from xml.etree import ElementTree
 from xml.dom import minidom
+import sqlite3
+import numpy as np
+import pandas as pd
 
 class Parser_7_coeffs:
     """
@@ -147,4 +150,94 @@ class Parser_7_coeffs:
             #add specie to root
             root.append(specie)
 
-        return self.prettify(root)
+        result = self.prettify(root)
+        f = open("7poly.xml","w")
+        f.write(result)
+        f.close()
+
+        return result
+
+    def create_tables(self):
+        pd.set_option('display.width', 500)
+        pd.set_option('display.max_columns', 100)
+        pd.set_option('display.notebook_repr_html', True)
+
+        db = sqlite3.connect('HW10_demo.sqlite')
+        cursor = db.cursor()
+        cursor.execute("DROP TABLE IF EXISTS LOW")
+        cursor.execute("DROP TABLE IF EXISTS HIGH")
+        cursor.execute("PRAGMA foreign_keys=1")
+
+        #Create High and Low tables
+        cursor.execute('''CREATE TABLE LOW (
+                       SPECIES_NAME TEXT NOT NULL,
+                       TLOW TEXT NOT NULL,
+                       THIGH TEXT NOT NULL,
+                       COEFF_1 TEXT NOT NULL,
+                       COEFF_2 TEXT NOT NULL,
+                       COEFF_3 TEXT NOT NULL,
+                       COEFF_4 TEXT NOT NULL,
+                       COEFF_5 TEXT NOT NULL,
+                       COEFF_6 TEXT NOT NULL,
+                       COEFF_7 TEXT NOT NULL,
+                       COEFF_8 TEXT NOT NULL)''')
+
+        # Commit changes to the database
+        db.commit()
+        cursor.execute('''CREATE TABLE HIGH (
+                       SPECIES_NAME TEXT NOT NULL,
+                       TLOW TEXT NOT NULL,
+                       THIGH TEXT NOT NULL,
+                       COEFF_1 TEXT NOT NULL,
+                       COEFF_2 TEXT NOT NULL,
+                       COEFF_3 TEXT NOT NULL,
+                       COEFF_4 TEXT NOT NULL,
+                       COEFF_5 TEXT NOT NULL,
+                       COEFF_6 TEXT NOT NULL,
+                       COEFF_7 TEXT NOT NULL)''')
+        db.commit()
+
+def species_xml_to_db(self):
+    #create xml & db
+    self.species_dict_to_xml()
+    self.create_tables()
+
+    #Get the xml
+    tree = ET.parse('7poly.xml')
+    root = tree.getroot()
+
+    #get species
+    species = root.findall('specie')
+
+    for specie in species:
+        name = specie.get('name')
+
+        #get low temp high/low and coeffs for each specie
+        NASA = specie.find('thermo').findall('NASA')
+
+        #get low info
+        low_tmax = NASA[0].get('Tmax')
+        low_tmin = NASA[0].get('Tmin')
+
+        #to handle where there are 8 low coeffs
+        lows = NASA[0].find('floatArray').text.split()
+        if(len(lows) > 7):
+            Low_C_1,Low_C_2,Low_C_3,Low_C_4,Low_C_5,Low_C_6,Low_C_7,Low_C_8 = lows[0:8]
+            lows_to_insert = (name,low_tmin,low_tmax,Low_C_1.strip(','),Low_C_2.strip(','),Low_C_3.strip(','),Low_C_4.strip(','),Low_C_5.strip(','),Low_C_6.strip(','),Low_C_7.strip(','),Low_C_8.strip(','))
+        else:
+            Low_C_1,Low_C_2,Low_C_3,Low_C_4,Low_C_5,Low_C_6,Low_C_7 = lows[0:7]
+            lows_to_insert = (name,low_tmin,low_tmax,Low_C_1.strip(','),Low_C_2.strip(','),Low_C_3.strip(','),Low_C_4.strip(','),Low_C_5.strip(','),Low_C_6.strip(','),Low_C_7.strip(','),"")
+
+        #get low info
+        high_tmax = NASA[1].get('Tmax')
+        high_tmin = NASA[1].get('Tmin')
+        High_C_1,High_C_2,High_C_3,High_C_4,High_C_5,High_C_6,High_C_7 = NASA[1].find('floatArray').text.strip(',').split()[0:7]
+        high_to_insert = name,high_tmin,high_tmax,High_C_1.strip(','),High_C_2.strip(','),High_C_3.strip(','),High_C_4.strip(','),High_C_5.strip(','),High_C_6.strip(','),High_C_7.strip(',')
+
+        #Insert the values for each species into table
+        cursor.execute('''INSERT INTO LOW
+                      (SPECIES_NAME, TLOW, THIGH, COEFF_1, COEFF_2,COEFF_3,COEFF_4,COEFF_5,COEFF_6,COEFF_7, COEFF_8)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', lows_to_insert)
+        cursor.execute('''INSERT INTO HIGH
+                      (SPECIES_NAME, TLOW, THIGH, COEFF_1, COEFF_2,COEFF_3,COEFF_4,COEFF_5,COEFF_6,COEFF_7)
+                      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', high_to_insert)
