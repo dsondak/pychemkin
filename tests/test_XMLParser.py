@@ -109,9 +109,39 @@ def test_const_k():
         xml_filename = "tests/test_xml_files/k_const.xml"
         parser = XMLParser(xml_filename)
 
-# def test_threebody_params():
-#     xml_filename = "tests/test_xml_files/rxn_ThreeBody.xml"
-#     parser = XMLParser(xml_filename, convert_units=True)
-#     params = {'A': 38000000000.0, 'b': -2.0, 'E': 0.0, 'name': None}
-#     assert (parser.reaction_list[0].rate_coeffs_components == params)
+def test_convert_units_when_no_units():
+    """Test when set convert_units to True but no units in xml"""
+    with pytest.raises(ValueError):
+        xml_filename = "tests/test_xml_files/A_arr.xml"
+        parser = XMLParser(xml_filename, convert_units=True)
+
+    with pytest.raises(ValueError):
+        xml_filename = "tests/test_xml_files/A_mod_arr.xml"
+        parser = XMLParser(xml_filename, convert_units=True)
+
+def test_unhandled_k():
+    """Test when unhandled k inputed"""
+    with pytest.raises(NotImplementedError):
+        xml_filename = "tests/test_xml_files/unhandled_k.xml"
+        parser = XMLParser(xml_filename)
+
+def test_unhandled_k():
+    """Test when b in arrhenius"""
+    with pytest.raises(ValueError):
+        xml_filename = "tests/test_xml_files/faulty_A_arr.xml"
+        parser = XMLParser(xml_filename)
+
+    with pytest.raises(ValueError):
+        xml_filename = "tests/test_xml_files/faulty_A_arr.xml"
+        parser = XMLParser(xml_filename, convert_units=True)
+
+def test_madeup_units():
+    """Test when unhandled units in xml"""
+    with pytest.raises(NotImplementedError):
+        xml_filename = "tests/test_xml_files/madeup_units_arr.xml"
+        parser = XMLParser(xml_filename, convert_units=True)
+
+    with pytest.raises(NotImplementedError):
+        xml_filename = "tests/test_xml_files/madeup_units_mod_arr.xml"
+        parser = XMLParser(xml_filename, convert_units=True)
 

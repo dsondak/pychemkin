@@ -154,6 +154,7 @@ class XMLParser:
                                          "Set convert_units to False to continue")
                     A_conv_lis = []
                     for unit in A_unit:
+                        print(unit)
                         try:
                             A_conv_lis.append(dict_[unit])
                         except:
