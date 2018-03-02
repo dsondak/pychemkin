@@ -162,7 +162,7 @@ class Parser_7_coeffs:
         pd.set_option('display.max_columns', 100)
         pd.set_option('display.notebook_repr_html', True)
 
-        db = sqlite3.connect('HW10_demo.sqlite')
+        db = sqlite3.connect('7Poly.sqlite')
         cursor = db.cursor()
         cursor.execute("DROP TABLE IF EXISTS LOW")
         cursor.execute("DROP TABLE IF EXISTS HIGH")
