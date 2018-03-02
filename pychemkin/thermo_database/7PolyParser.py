@@ -111,7 +111,7 @@ class Parser_7_coeffs:
 
     def species_dict_to_xml(self):
 
-        species_info = species_txt_to_dict()
+        species_info = self.species_txt_to_dict()
 
         #create root for xml file
         root = Element('specieData')
@@ -147,4 +147,4 @@ class Parser_7_coeffs:
             #add specie to root
             root.append(specie)
 
-        return prettify(root)
+        return self.prettify(root)
