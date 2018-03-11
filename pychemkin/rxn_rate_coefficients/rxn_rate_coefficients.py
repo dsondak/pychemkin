@@ -3,40 +3,42 @@
 
 import numbers
 import numpy
-from pychemkin.parsers import SQLParser
 import warnings
+from pychemkin.parsers import SQLParser
 
 
 class ReactionCoeff:
-    """Class for reaction rate coefficients, or values k."""
+    """Class for (forward) reaction rate coefficient."""
     def __init__(self, k_parameters, T=None):
-        """Initializes reaction rate coefficients.
+        """Initializes reaction rate coefficient.
 
         INPUTS:
         -------
+        k_parameters : dictionary, required
+            Dictionary of parameters to compute reaction rate coefficient
         T : int or float
-            temperature of the reaction (in Kelvin)
-        k_parameters : dictionary
-            dictionary of parameters to compute k
+            Temperature of reaction, in Kelvin (default: None,
+            in case rxn rate coefficient is temperature-independent)
         """
         self.k_parameters = k_parameters
         self.T = T
         self.k = self.get_coeff(self.k_parameters, self.T)
 
     def get_coeff(self, k_parameters, T):
-        """Computes reaction rate coefficients depending on passed parameters.
+        """Computes reaction rate coefficients
+        using passed parameters.
 
         INPUTS:
         -------
-        T : int or float
-            temperature of the reaction (in Kelvin)
         k_parameters : dictionary
-            dictionary of parameters to compute k
+            Dictionary of parameters to compute rxn rate coefficient
+        T : int or float
+            Temperature of the reaction, in Kelvin
         
         RETURNS:
         --------
         k : int or float
-            reaction rate coefficient of the reaction
+            Reaction rate coefficient
 
         NOTES:
         ------
@@ -96,17 +98,17 @@ class ReactionCoeff:
 
 
     def const(self, k):
-        """Returns constant reaction rate coefficients k.
+        """Returns constant reaction rate coefficient.
 
         INPUTS:
         -------
         k : numeric type 
-            constant reaction rate coefficient
+            Constant reaction rate coefficient
 
         RETURNS:
         --------
         k : numeric type
-            constant reaction rate coefficients.
+            Constant reaction rate coefficients.
 
         NOTES:
         ------
@@ -115,11 +117,10 @@ class ReactionCoeff:
         """
         if k <= 0:
             raise ValueError("Reaction rate must be positive.")
-        
         return k
 
-    def arr(self, A, E, T, R=8.314):
-        """Returns Arrhenius reaction rate coefficients k.
+    def arr(self, A, E, T, R=8.3144598):
+        """Returns Arrhenius reaction rate coefficient.
 
         INPUTS:
         -------
@@ -154,14 +155,13 @@ class ReactionCoeff:
         if (R <= 0):
             raise ValueError("Gas constant 'R' must be positive.")
 
-        if not numpy.isclose(R, 8.314):
+        if not numpy.isclose(R, 8.3144598):
             warnings.warn("Please do not change the value of"
-                          " Universal Gas Constant 'R' unless you are converting units.")
-
+                          " universal gas constant 'R' unless you are converting units.")
         k = A * numpy.exp(-E / R / T)
         return k
 
-    def mod_arr(self, A, b, E, T, R=8.314):
+    def mod_arr(self, A, b, E, T, R=8.3144598):
         """Returns Arrhenius reaction rate coefficients k.
 
         INPUTS:
@@ -206,15 +206,12 @@ class ReactionCoeff:
         if (R <= 0):
             raise ValueError("Gas constant 'R' must be positive.")
 
-        if not numpy.isclose(R, 8.314):
+        if not numpy.isclose(R, 8.3144598):
             warnings.warn("Please do not change the value of"
-                          " Universal Gas Constant 'R' unless for converting units.")
+                          " universal gas constant 'R' unless you are converting units.")
 
         k = A * T ** b * numpy.exp(-E / R / T)
         return k
-
-
-
 
 
 class BackwardReactionCoeff:

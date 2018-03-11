@@ -26,7 +26,7 @@ def test_ReactionCoeff_constant_with_others():
     k_parameters = {'k': 10,'A': 10**7, "q":8}
     with pytest.raises(ValueError) as excinfo:
         k_test = ReactionCoeff(k_parameters).k
-        #assert excinfo.value.message == "Invalid key in the input!"
+        assert excinfo.value.message == "Invalid key in the input!"
 
 def test_ReactionCoeff_invalid_constant():
     """Test when reaction rate coefficient is constant but invalid (non-positive)"""
@@ -44,27 +44,27 @@ def test_ReactionCoeff_constant_with_T():
 
 def test_ReactionCoeff_arrhenius():
     """Test when reaction rate coefficient is Arrhenius"""
-    k_parameters = {'A': 10**7, 'E':10**3}
+    k_parameters = {'A': 10**7, 'E':10**3, 'R':8.3144598}
     T = 10**2
     k_test = ReactionCoeff(k_parameters, T).k
-    assert numpy.isclose(k_test, 3003549.08896)
+    assert numpy.isclose(k_test, 3003748.8791204286)
 
 def test_ReactionCoeff_arrhenius_invalid_A():
     """Test when reaction rate coefficient is Arrhenius but A is invalid (non-positive)"""
-    k_parameters = {'A': 0, 'E':100}
+    k_parameters = {'A': 0, 'E':100, 'R':8.3144598}
     T = 10
     with pytest.raises(ValueError):
         k_test = ReactionCoeff(k_parameters, T).k
    
 def test_ReactionCoeff_arrhenius_T_not_set():
     """Test when reaction rate coefficient is Arrhenius but T is not set by user"""
-    k_parameters = {'A': 10, 'E':100}
+    k_parameters = {'A': 10, 'E':100, 'R':8.3144598}
     with pytest.raises(ValueError):
         k_test = ReactionCoeff(k_parameters).k
 
 def test_ReactionCoeff_arrhenius_invalid_T():
     """Test when reaction rate coefficient is Arrhenius but T is invalid (non-positive)"""
-    k_parameters = {'A': 10, 'E':100}
+    k_parameters = {'A': 10, 'E':100, 'R':8.3144598}
     T = -10
     with pytest.raises(ValueError):
         k_test = ReactionCoeff(k_parameters, T).k
@@ -85,15 +85,15 @@ def test_ReactionCoeff_arrhenius_changing_R():
 
 def test_ReactionCoeff_mod_arrhenius():
     """Test when reaction rate coefficient is modified Arrhenius"""
-    k_parameters = {'A': 10**7, 'E':10**3, 'b': 0.5}
+    k_parameters = {'A': 10**7, 'E':10**3, 'b':0.5, 'R':8.3144598}
     T = 10**2
     k_test = ReactionCoeff(k_parameters, T).k
-    assert numpy.isclose(k_test, 30035490.8896)
+    assert numpy.isclose(k_test, 30037488.791204285)
 
 def test_ReactionCoeff_mod_arrhenius_invalid_A():
     """Test when reaction rate coefficient is modified
     Arrhenius but A is invalid (non-positive)"""
-    k_parameters = {'A': -10, 'E':100, 'b':0.5}
+    k_parameters = {'A': -10, 'E':100, 'b':0.5, 'R':8.3144598}
     T = 10
     with pytest.raises(ValueError):
         k_test = ReactionCoeff(k_parameters, T).k
@@ -101,7 +101,7 @@ def test_ReactionCoeff_mod_arrhenius_invalid_A():
 def test_ReactionCoeff_mod_arrhenius_invalid_b():
     """Test when reaction rate coefficient is modified
     Arrhenius but B is invalid (not real)"""
-    k_parameters = {'A': 10, 'E':100, 'b':0.5j}
+    k_parameters = {'A': 10, 'E':100, 'b':0.5j, 'R':8.3144598}
     T = 10
     with pytest.raises(TypeError):
         k_test = ReactionCoeff(k_parameters, T).k
@@ -109,14 +109,14 @@ def test_ReactionCoeff_mod_arrhenius_invalid_b():
 def test_ReactionCoeff_mod_arrhenius_T_not_set():
     """Test when reaction rate coefficient is modified
     Arrhenius but T is not set by user"""
-    k_parameters = {'A': 10, 'E':100, 'b':0.5}
+    k_parameters = {'A': 10, 'E':100, 'b':0.5, 'R':8.3144598}
     with pytest.raises(ValueError):
         k_test = ReactionCoeff(k_parameters).k
 
 def test_ReactionCoeff_mod_arrhenius_invalid_T():
     """Test when reaction rate coefficient is modified
     Arrhenius but T is invalid (non-positive)"""
-    k_parameters = {'A': 10, 'E':100, 'b':0.5}
+    k_parameters = {'A': 10, 'E':100, 'b':0.5, 'R':8.3144598}
     T = -10
     with pytest.raises(ValueError):
         k_test = ReactionCoeff(k_parameters, T).k
@@ -154,7 +154,8 @@ def test_backward_coeff():
                                 [1,0,0,0,0,0,0]])
     k_f = 100
     nu_i = numpy.array([-2, -1, 2])
-    bkwd_coeff = NASA7BackwardCoeffs(nu_i, expected_nasa)
+    bkwd_coeff = NASA7BackwardCoeffs(nu_i, expected_nasa,
+                                     p0=1e5, R=8.3144598)
     return bkwd_coeff
 
 def test_backwardCoeff_gamma(test_backward_coeff):
@@ -200,7 +201,6 @@ def test_backwardCoeff_computeCoeff(test_backward_coeff):
                                                         expected_delta_H_over_RT))
 
     expected_kb_val = 442457 # 100 / 2.260104919e-6
-
     assert numpy.isclose(test_backward_coeff.compute_backward_coeffs(k_f, T),
                          expected_kb_val)
 

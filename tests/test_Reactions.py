@@ -120,7 +120,7 @@ def test_irrev_reaction_arrhenius():
                                 is_reversible=False,
                                 rxn_equation="H2 + OH =] H2O + H",
                                 species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
-                                rate_coeffs_components={'A': 10, 'E': 100},
+                                rate_coeffs_components={'A': 10, 'E': 100, 'R':8.3144598},
                                 reactant_stoich_coeffs={'H2' :1, 'OH':1},
                                 product_stoich_coeffs={'H2O' :1, 'H':1})
 
@@ -131,7 +131,7 @@ def test_irrev_reaction_modified_arr():
                                 is_reversible=False,
                                 rxn_equation="H2 + OH =] H2O + H",
                                 species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
-                                rate_coeffs_components={'A': 10, 'E': 100, 'b':0.5},
+                                rate_coeffs_components={'A': 10, 'E': 100, 'b':0.5, 'R':8.3144598},
                                 reactant_stoich_coeffs={'H2' :1, 'OH':1},
                                 product_stoich_coeffs={'H2O' :1, 'H':1})
 
@@ -188,7 +188,7 @@ def test_IrrevReaction_compute_reaction_rate_coeff_arrhenius(test_irrev_reaction
     except ValueError:
         test_irrev_reaction_arrhenius.set_temperature(10)
         k = test_irrev_reaction_arrhenius.compute_reaction_rate_coeff()
-    assert numpy.isclose(k, 3.0035490889639616)
+    assert numpy.isclose(k, 3.0037488791204288)
 
 def test_IrrevReaction_compute_reaction_rate_coeff_mod_arrhenius(test_irrev_reaction_modified_arr):
     """Test reaction with modified arrhenius rate coefficient."""
@@ -198,7 +198,7 @@ def test_IrrevReaction_compute_reaction_rate_coeff_mod_arrhenius(test_irrev_reac
     except ValueError:
         test_irrev_reaction_modified_arr.set_temperature(10)
         k = test_irrev_reaction_modified_arr.compute_reaction_rate_coeff()
-    assert numpy.isclose(k, 9.4980561852498244)
+    assert numpy.isclose(k, 9.498687977198342)
 
 def test_IrrevReaction_compute_progress_rate():
     """Test compute_progress_rate() for an elementary,
@@ -314,14 +314,17 @@ def test_compute_reaction_rate_coeff_rev_rxn(test_rev_reaction):
     T = 400
     test_rev_reaction.set_temperature(T)
     lowT_nasa = {'O2': numpy.array([3.21293640e+00, 1.12748635e-03,
-                                       -5.75615047e-07, 1.31387723e-09,
-                                       -8.76855392e-13, -1.00524902e+03, 6.03473759e+00]),
+                                   -5.75615047e-07, 1.31387723e-09,
+                                   -8.76855392e-13, -1.00524902e+03,
+                                   6.03473759e+00]),
                     'H2O': numpy.array([3.38684249e+00, 3.47498246e-03,
                                        -6.35469633e-06, 6.96858127e-09,
-                                       -2.50658847e-12, -3.02081133e+04, 2.59023285e+00]),
+                                       -2.50658847e-12, -3.02081133e+04,
+                                       2.59023285e+00]),
                     'H': numpy.array([2.50000000e+00, 0.00000000e+00,
                                      0.00000000e+00, 0.00000000e+00,
-                                     0.00000000e+00, 2.54716270e+04, -4.60117608e-01])}
+                                     0.00000000e+00, 2.54716270e+04,
+                                     -4.60117608e-01])}
     test_rev_reaction.set_NASA_poly_coefs(lowT_nasa)
     kf, kb = test_rev_reaction.compute_reaction_rate_coeff(T=T)
     assert kf == 10
