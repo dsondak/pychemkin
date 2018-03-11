@@ -91,7 +91,7 @@ class ReactionSystem(object):
 
         return rxn_rates_dict
 
-    def get_nasa_matrix(self, NASA_poly_coef):
+    def get_nasa_matrix(self, NASA_poly_coeff):
         """Computes array of NASA polynomial coefficients.
 
         INPUTS:
@@ -107,8 +107,8 @@ class ReactionSystem(object):
         """
 
         NASA = {}
-        for specie in NASA_poly_coef:
-            specie_dict = NASA_poly_coef[specie]
+        for specie in NASA_poly_coeff:
+            specie_dict = NASA_poly_coeff[specie]
             if self.temperature <= specie_dict["Tmid"]: # get the low temperature
                 NASA[specie] = specie_dict["low"]
             else:

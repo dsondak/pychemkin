@@ -49,19 +49,13 @@ class ReactionCoeff:
             - Options to alter values of R (to change units) but strongly discouraged
             - Raises ValueError if valid T not inputed/set for Arrhenius and modified Arrhenius
         """
-        #check if the key-arguments are valid
-        keys = set(k_parameters.keys())
-        valid_keys = set(['A', 'E', 'b', "R", "k"])
-        if not(keys <= valid_keys):
-            raise ValueError("Invalid key in the input. Use get_coeff function to implement your own k!")
-
         # Constant
-        if "k" in k_parameters:
+        if "k" in k_parameters and len(k_parameters) == 1:
             return self.const(k_parameters['k'])
         
         # Arrhenius
-        elif ("A" in k_parameters and "E" in k_parameters and
-              "b" not in k_parameters):
+        elif (("A" in k_parameters and "E" in k_parameters and "b" not in k_parameters) and
+              (len(k_parameters)==2 or len(k_parameters)==3)):
 
             if T == None:
                 raise ValueError("Temperature has not been set in the reaction. Please use set_temperature() method.")
@@ -72,12 +66,18 @@ class ReactionCoeff:
                                 T=T,
                                 R=k_parameters['R'])
             else:
-                return self.arr(A=k_parameters['A'],
-                                E=k_parameters['E'],
-                                T=T)
+                if len(k_parameters) == 2:
+                    return self.arr(A=k_parameters['A'],
+                                    E=k_parameters['E'],
+                                    T=T)
+                else:
+                    raise NotImplementedError("The combination of parameters entered is not supported "
+                                              "for the calculation of reaction rate coefficient.")
+
         
         # Modified Arrhenius
-        elif ("A" in k_parameters and "E" in k_parameters  and "b" in k_parameters):
+        elif (("A" in k_parameters and "E" in k_parameters  and "b" in k_parameters) and
+              (len(k_parameters) == 3 or len(k_parameters) == 4)):
             if T == None:
                 raise ValueError("Temperature has not been set in the reaction. Please use set_temperature() method.")
 
@@ -88,10 +88,14 @@ class ReactionCoeff:
                                     b=k_parameters['b'],
                                     T=T)
             else:
-                return self.mod_arr(A=k_parameters['A'],
-                                    E=k_parameters['E'],
-                                    b=k_parameters['b'],
-                                    T=T)
+                if len(k_parameters) == 3:
+                    return self.mod_arr(A=k_parameters['A'],
+                                        E=k_parameters['E'],
+                                        b=k_parameters['b'],
+                                        T=T)
+                else:
+                    raise NotImplementedError("The combination of parameters entered is not supported "
+                                              "for the calculation of reaction rate coefficient.")
 
         else:
             raise NotImplementedError("The combination of parameters entered is not supported for the calculation of Reaction Rate Coefficient.")
@@ -271,6 +275,9 @@ class NASA7BackwardCoeffs(BackwardReactionCoeff):
         self.nasa7_coeffs = nasa7_coeffs
         self.p0 = p0
         self.R = R
+        if not numpy.isclose(self.R, 8.3144598):
+            warnings.warn("Please do not change the value of"
+                          " universal gas constant 'R' unless you are converting units.")
         self.gamma = numpy.sum(self.nui)
 
     def H_over_RT(self, T):
@@ -358,9 +365,9 @@ class NASA7BackwardCoeffs(BackwardReactionCoeff):
         # Negative of change in Gibbs free energy for each reaction
         delta_G_over_RT = delta_S_over_R - delta_H_over_RT
 
-        # Prefactor in k_e (equilibrium coefficient)
+        # Prefactor for equilibrium coefficient
         fact = self.p0 / self.R / T
 
+        # Compute equilibrium coefficient
         ke = (fact ** self.gamma) * numpy.exp(delta_G_over_RT)
-
         return kf / ke

@@ -20,13 +20,25 @@ def test_ReactionCoeff_constant():
     k_test = ReactionCoeff(k_parameters).k
     assert k_test == 10
 
-
-def test_ReactionCoeff_constant_with_others():
-    """Test when reaction rate coefficient and A', 'b', 'E' all exists"""
-    k_parameters = {'k': 10,'A': 10**7, "q":8}
-    with pytest.raises(ValueError) as excinfo:
+def test_ReactionCoeff_unrecognized_const_k_component():
+    """Test when user defines unhandled reaction rate coefficient components"""
+    k_parameters = {'k': 10, 'q':8}
+    with pytest.raises(NotImplementedError):
         k_test = ReactionCoeff(k_parameters).k
-        assert excinfo.value.message == "Invalid key in the input!"
+
+def test_ReactionCoeff_unrecognized_arr_k_component():
+    """Test when user defines unhandled reaction rate coefficient components"""
+    k_parameters = {'A': 10**7, 'E':10**3, 'madeup':120}
+    T = 10
+    with pytest.raises(NotImplementedError):
+        k_test = ReactionCoeff(k_parameters, T).k
+
+def test_ReactionCoeff_unrecognized_modarr_k_component():
+    """Test when user defines unhandled reaction rate coefficient components"""
+    k_parameters = {'A': 10**7, 'E':10**3, 'b':0.5, 'madeup':120}
+    T = 10
+    with pytest.raises(NotImplementedError):
+        k_test = ReactionCoeff(k_parameters, T).k
 
 def test_ReactionCoeff_invalid_constant():
     """Test when reaction rate coefficient is constant but invalid (non-positive)"""
