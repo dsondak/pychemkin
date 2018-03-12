@@ -179,11 +179,23 @@ def test_unit_check_4_mod_arr():
     assert numpy.isclose(b, 2.7)
 
 def test_unit_conversion_fail_arr():
-    xml_filename = "tests/test_xml_files/unit_conversion_fail_arr.xml"
+    xml_filename = "tests/test_xml_files/unit_conversion_fail_arr_A.xml"
+    with pytest.raises(ValueError):
+        parser = XMLParser(xml_filename, convert_units=True)
+
+    xml_filename = "tests/test_xml_files/unit_conversion_fail_arr_E.xml"
     with pytest.raises(ValueError):
         parser = XMLParser(xml_filename, convert_units=True)
 
 def test_unit_conversion_fail_modarr():
-    xml_filename = "tests/test_xml_files/unit_conversion_fail_modarr.xml"
+    xml_filename = "tests/test_xml_files/unit_conversion_fail_modarr_A.xml"
+    with pytest.raises(ValueError):
+        parser = XMLParser(xml_filename, convert_units=True)
+
+    xml_filename = "tests/test_xml_files/unit_conversion_fail_modarr_b.xml"
+    with pytest.raises(ValueError):
+        parser = XMLParser(xml_filename, convert_units=True)
+
+    xml_filename = "tests/test_xml_files/unit_conversion_fail_modarr_E.xml"
     with pytest.raises(ValueError):
         parser = XMLParser(xml_filename, convert_units=True)
