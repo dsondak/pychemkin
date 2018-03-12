@@ -131,8 +131,6 @@ def test_unhandled_k_xml():
     xml_filename = "tests/test_xml_files/unhandled_k.xml"
     with pytest.raises(NotImplementedError):
         parser = XMLParser(xml_filename)
-        test_rxn = parser.reaction_list[0]
-        parser.get_rate_coeffs_components(test_rxn)
 
 def test_faulty_b_in_arr():
     """Test when b in Arrhenius (vs. modified Arrhenius)."""
