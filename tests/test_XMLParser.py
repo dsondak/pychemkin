@@ -1,6 +1,7 @@
 
 """Tests for XMLParser"""
 
+import numpy
 import pytest
 import os
 
@@ -119,16 +120,16 @@ def test_convert_units_when_no_units():
         xml_filename = "tests/test_xml_files/A_mod_arr.xml"
         parser = XMLParser(xml_filename, convert_units=True)
 
-# def test_unhandled_k():
-#     """Test when unhandled k inputed"""
-#     xml_filename = "tests/test_xml_files/unhandled_k.xml"
-#     with pytest.raises(NotImplementedError):
-#         parser = XMLParser(xml_filename)
-#         test_rxn = parser.reaction_list[0]
-#         parser.get_rate_coeffs_components(test_rxn)
+def test_unhandled_k_xml():
+    """Test when unhandled k inputed"""
+    xml_filename = "tests/test_xml_files/unhandled_k.xml"
+    with pytest.raises(NotImplementedError):
+        parser = XMLParser(xml_filename)
+        test_rxn = parser.reaction_list[0]
+        parser.get_rate_coeffs_components(test_rxn)
 
-def test_unhandled_k():
-    """Test when b in arrhenius"""
+def test_faulty_b_in_arr():
+    """Test when b in Arrhenius (vs. modified Arrhenius)."""
     with pytest.raises(ValueError):
         xml_filename = "tests/test_xml_files/faulty_A_arr.xml"
         parser = XMLParser(xml_filename)
@@ -140,10 +141,43 @@ def test_unhandled_k():
 def test_madeup_units():
     """Test when unhandled units in xml"""
     with pytest.raises(NotImplementedError):
-        xml_filename = "tests/test_xml_files/madeup_units_arr.xml"
+        xml_filename = "tests/test_xml_files/madeup_units_4_A_arr.xml"
         parser = XMLParser(xml_filename, convert_units=True)
 
     with pytest.raises(NotImplementedError):
-        xml_filename = "tests/test_xml_files/madeup_units_mod_arr.xml"
+        xml_filename = "tests/test_xml_files/madeup_units_4_A_mod_arr.xml"
         parser = XMLParser(xml_filename, convert_units=True)
 
+    with pytest.raises(NotImplementedError):
+        xml_filename = "tests/test_xml_files/madeup_units_4_E_arr.xml"
+        parser = XMLParser(xml_filename, convert_units=True)
+
+    with pytest.raises(NotImplementedError):
+        xml_filename = "tests/test_xml_files/madeup_units_4_E_mod_arr.xml"
+        parser = XMLParser(xml_filename, convert_units=True)
+
+def test_unit_check_4_arr():
+    xml_filename = "tests/test_xml_files/unit_check_arr.xml"
+    parser = XMLParser(xml_filename, convert_units=True)
+    A = parser.reaction_list[0].rate_coeffs_components['A']
+    E = parser.reaction_list[0].rate_coeffs_components['E']
+    assert numpy.isclose(A, 35200)
+    assert numpy.isclose(E, 298737.6)
+
+def test_unit_check_4_arr():
+    xml_filename = "tests/test_xml_files/unit_check_arr.xml"
+    parser = XMLParser(xml_filename, convert_units=True)
+    A = parser.reaction_list[0].rate_coeffs_components['A']
+    E = parser.reaction_list[0].rate_coeffs_components['E']
+    assert numpy.isclose(A, 35200)
+    assert numpy.isclose(E, 298737.6)
+
+def test_unit_check_4_mod_arr():
+    xml_filename = "tests/test_xml_files/unit_check_modarr.xml"
+    parser = XMLParser(xml_filename, convert_units=True)
+    A = parser.reaction_list[0].rate_coeffs_components['A']
+    E = parser.reaction_list[0].rate_coeffs_components['E']
+    b = parser.reaction_list[0].rate_coeffs_components['b']
+    assert numpy.isclose(A, 35200)
+    assert numpy.isclose(E, 298737.6)
+    assert numpy.isclose(b, 2.7)
