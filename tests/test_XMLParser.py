@@ -15,6 +15,12 @@ def test_XMLParser_file_not_found():
     with pytest.raises(OSError):
         parser = XMLParser("no_such_file")
 
+def test_XMLParser_unhandled_rxn():
+    """Test when reaction is unhandled by pychemkin"""
+    xml_filename = "tests/test_xml_files/unhandled_rxn.xml"
+    with pytest.raises(NotImplementedError):
+        parser = XMLParser(xml_filename)
+
 def test_XMLParser_species():
     """Test when reaction rate coefficient is modified
     Arrhenius but R is changed by user"""
@@ -164,14 +170,6 @@ def test_unit_check_4_arr():
     assert numpy.isclose(A, 35200)
     assert numpy.isclose(E, 298737.6)
 
-def test_unit_check_4_arr():
-    xml_filename = "tests/test_xml_files/unit_check_arr.xml"
-    parser = XMLParser(xml_filename, convert_units=True)
-    A = parser.reaction_list[0].rate_coeffs_components['A']
-    E = parser.reaction_list[0].rate_coeffs_components['E']
-    assert numpy.isclose(A, 35200)
-    assert numpy.isclose(E, 298737.6)
-
 def test_unit_check_4_mod_arr():
     xml_filename = "tests/test_xml_files/unit_check_modarr.xml"
     parser = XMLParser(xml_filename, convert_units=True)
@@ -181,3 +179,13 @@ def test_unit_check_4_mod_arr():
     assert numpy.isclose(A, 35200)
     assert numpy.isclose(E, 298737.6)
     assert numpy.isclose(b, 2.7)
+
+def test_unit_conversion_fail_arr():
+    xml_filename = "tests/test_xml_files/unit_conversion_fail_arr.xml"
+    with pytest.raises(ValueError):
+        parser = XMLParser(xml_filename, convert_units=True)
+
+def test_unit_conversion_fail_modarr():
+    xml_filename = "tests/test_xml_files/unit_conversion_fail_modarr.xml"
+    with pytest.raises(ValueError):
+        parser = XMLParser(xml_filename, convert_units=True)
