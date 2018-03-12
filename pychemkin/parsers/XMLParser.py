@@ -255,6 +255,7 @@ class XMLParser:
                                          "not as expected.")
 
             elif rateCoeff.tag == 'Constant':
+                print('here')
                 try:
                     k = float(rateCoeff.find('k').text)
                     d = {'k': k}

@@ -121,9 +121,11 @@ def test_convert_units_when_no_units():
 
 def test_unhandled_k():
     """Test when unhandled k inputed"""
+    xml_filename = "tests/test_xml_files/unhandled_k.xml"
+    parser = XMLParser(xml_filename)
+    test_rxn = parser.reaction_list[0]
     with pytest.raises(NotImplementedError):
-        xml_filename = "tests/test_xml_files/unhandled_k.xml"
-        parser = XMLParser(xml_filename)
+        parser.get_rate_coeffs_components(test_rxn)
 
 def test_unhandled_k():
     """Test when b in arrhenius"""

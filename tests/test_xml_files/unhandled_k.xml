@@ -8,7 +8,7 @@
 
     <reactionData id="test_mechanism">
 
-        <!-- reaction 03 -->
+        <!-- reaction 01 -->
         <reaction reversible="no" type="Elementary" id="reaction03">
             <equation>H2 + OH =] H2O + H</equation>
             <rateCoeff>
