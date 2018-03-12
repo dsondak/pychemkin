@@ -174,11 +174,8 @@ class XMLParser:
                         E = float(rateCoeff.find('E').text)*E_conversion
                         d = {'A': A, 'E': E}
                     except:
-                        print("Conversion failed. " +
-                              "Resulting units have not been converted.")
-                        A = float(rateCoeff.find('A').text)
-                        E = float(rateCoeff.find('E').text)
-                        d = {'A': A, 'E': E}
+                        raise ValueError("Conversion failed. "
+                                         "Resulting units have not been converted.")
                     if rateCoeff.find('b') is not None:
                         raise ValueError("Cannot use 'b' in Arrhenius type.")
                 # If 'Arrhenius' units are not to be converted
@@ -233,12 +230,8 @@ class XMLParser:
                         # if rateCoeff.tag == 'Kooij':
                         #     d['name'] = kooij_name
                     except:
-                        print("Conversion failed. " +
-                              "Resulting units have not been converted.")
-                        A = float(rateCoeff.find('A').text)
-                        b = float(rateCoeff.find('b').text)
-                        E = float(rateCoeff.find('E').text)
-                        d = {'A': A, 'b': b, 'E': E}
+                        raise ValueError("Conversion failed. "
+                                         "Resulting units have not been converted.")
                         # if rateCoeff.tag == 'Kooij':
                         #     d['name'] = kooij_name
                 # If 'modifiedArrhenius' units are not to be converted
