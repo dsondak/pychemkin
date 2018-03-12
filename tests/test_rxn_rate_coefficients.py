@@ -8,7 +8,7 @@ import warnings
 # Treat warnings like errors (for testing purposes)
 warnings.simplefilter("error")
 
-from pychemkin.rxn_rate_coefficients.rxn_rate_coefficients import ReactionCoeff, NASA7BackwardCoeffs
+from pychemkin.rxn_rate_coefficients.rxn_rate_coefficients import ReactionCoeff, BackwardReactionCoeff, NASA7BackwardCoeffs
 
 
 # ======================= TESTS FOR REACTIONCOEFF ====================== #
@@ -157,6 +157,12 @@ def test_ReactionCoeff_mod_arrhenius_changing_R():
 
 # ======================= TESTS FOR BACKWARDCOEFF ====================== #
 
+def test_backward_coeff_baseclass():
+    """Test BackwardReactionCoeff class"""
+    bkwd_coeff = BackwardReactionCoeff()
+    with pytest.raises(NotImplementedError):
+        bkwd_coeff.compute_backward_coeffs()
+
 @pytest.fixture
 def test_backward_coeff():
     """Returns a working (but artificial) example of
@@ -169,6 +175,17 @@ def test_backward_coeff():
     bkwd_coeff = NASA7BackwardCoeffs(nu_i, expected_nasa,
                                      p0=1e5, R=8.3144598)
     return bkwd_coeff
+
+def test_backwardCoeff_changing_R():
+    """Test NASA7 backward coefficient where R is changed by user"""
+    expected_nasa = numpy.array([[1,0,0,0,0,0,0],
+                                [1,0,0,0,0,0,0],
+                                [1,0,0,0,0,0,0]])
+    k_f = 100
+    nu_i = numpy.array([-2, -1, 2])
+    with pytest.raises(UserWarning):
+        kwd_coeff = NASA7BackwardCoeffs(nu_i, expected_nasa,
+                                        p0=1e5, R=43.3423)
 
 def test_backwardCoeff_gamma(test_backward_coeff):
     """Tests value of gamma for working example."""
