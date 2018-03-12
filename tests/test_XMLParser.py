@@ -116,15 +116,15 @@ def test_const_k():
         xml_filename = "tests/test_xml_files/k_const.xml"
         parser = XMLParser(xml_filename)
 
-def test_convert_units_when_no_units():
-    """Test when set convert_units to True but no units in xml"""
+def test_convert_to_SI_units_when_no_units():
+    """Test when set convert_to_SI_units to True but no units in xml"""
     with pytest.raises(ValueError):
         xml_filename = "tests/test_xml_files/A_arr.xml"
-        parser = XMLParser(xml_filename, convert_units=True)
+        parser = XMLParser(xml_filename, convert_to_SI_units=True)
 
     with pytest.raises(ValueError):
         xml_filename = "tests/test_xml_files/A_mod_arr.xml"
-        parser = XMLParser(xml_filename, convert_units=True)
+        parser = XMLParser(xml_filename, convert_to_SI_units=True)
 
 def test_unhandled_k_xml():
     """Test when unhandled k inputed"""
@@ -140,29 +140,29 @@ def test_faulty_b_in_arr():
 
     with pytest.raises(ValueError):
         xml_filename = "tests/test_xml_files/faulty_A_arr.xml"
-        parser = XMLParser(xml_filename, convert_units=True)
+        parser = XMLParser(xml_filename, convert_to_SI_units=True)
 
 def test_madeup_units():
     """Test when unhandled units in xml"""
     with pytest.raises(NotImplementedError):
         xml_filename = "tests/test_xml_files/madeup_units_4_A_arr.xml"
-        parser = XMLParser(xml_filename, convert_units=True)
+        parser = XMLParser(xml_filename, convert_to_SI_units=True)
 
     with pytest.raises(NotImplementedError):
         xml_filename = "tests/test_xml_files/madeup_units_4_A_mod_arr.xml"
-        parser = XMLParser(xml_filename, convert_units=True)
+        parser = XMLParser(xml_filename, convert_to_SI_units=True)
 
     with pytest.raises(NotImplementedError):
         xml_filename = "tests/test_xml_files/madeup_units_4_E_arr.xml"
-        parser = XMLParser(xml_filename, convert_units=True)
+        parser = XMLParser(xml_filename, convert_to_SI_units=True)
 
     with pytest.raises(NotImplementedError):
         xml_filename = "tests/test_xml_files/madeup_units_4_E_mod_arr.xml"
-        parser = XMLParser(xml_filename, convert_units=True)
+        parser = XMLParser(xml_filename, convert_to_SI_units=True)
 
 def test_unit_check_4_arr():
     xml_filename = "tests/test_xml_files/unit_check_arr.xml"
-    parser = XMLParser(xml_filename, convert_units=True)
+    parser = XMLParser(xml_filename, convert_to_SI_units=True)
     A = parser.reaction_list[0].rate_coeffs_components['A']
     E = parser.reaction_list[0].rate_coeffs_components['E']
     assert numpy.isclose(A, 35200)
@@ -170,7 +170,7 @@ def test_unit_check_4_arr():
 
 def test_unit_check_4_mod_arr():
     xml_filename = "tests/test_xml_files/unit_check_modarr.xml"
-    parser = XMLParser(xml_filename, convert_units=True)
+    parser = XMLParser(xml_filename, convert_to_SI_units=True)
     A = parser.reaction_list[0].rate_coeffs_components['A']
     E = parser.reaction_list[0].rate_coeffs_components['E']
     b = parser.reaction_list[0].rate_coeffs_components['b']
@@ -181,21 +181,21 @@ def test_unit_check_4_mod_arr():
 def test_unit_conversion_fail_arr():
     xml_filename = "tests/test_xml_files/unit_conversion_fail_arr_A.xml"
     with pytest.raises(ValueError):
-        parser = XMLParser(xml_filename, convert_units=True)
+        parser = XMLParser(xml_filename, convert_to_SI_units=True)
 
     xml_filename = "tests/test_xml_files/unit_conversion_fail_arr_E.xml"
     with pytest.raises(ValueError):
-        parser = XMLParser(xml_filename, convert_units=True)
+        parser = XMLParser(xml_filename, convert_to_SI_units=True)
 
 def test_unit_conversion_fail_modarr():
     xml_filename = "tests/test_xml_files/unit_conversion_fail_modarr_A.xml"
     with pytest.raises(ValueError):
-        parser = XMLParser(xml_filename, convert_units=True)
+        parser = XMLParser(xml_filename, convert_to_SI_units=True)
 
     xml_filename = "tests/test_xml_files/unit_conversion_fail_modarr_b.xml"
     with pytest.raises(ValueError):
-        parser = XMLParser(xml_filename, convert_units=True)
+        parser = XMLParser(xml_filename, convert_to_SI_units=True)
 
     xml_filename = "tests/test_xml_files/unit_conversion_fail_modarr_E.xml"
     with pytest.raises(ValueError):
-        parser = XMLParser(xml_filename, convert_units=True)
+        parser = XMLParser(xml_filename, convert_to_SI_units=True)

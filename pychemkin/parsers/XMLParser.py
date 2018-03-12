@@ -12,7 +12,7 @@ from pychemkin.reactions.Reactions import *
 class XMLParser:
     """Parser for input XML files to retrieve and
     preprocess reaction data."""
-    def __init__(self, xml_filename, convert_units=False):
+    def __init__(self, xml_filename, convert_to_SI_units=False):
         """Initializes parser for input XML files.
         
         Args:
@@ -43,7 +43,7 @@ class XMLParser:
 
         self.reaction_list = []
         self.species = {}
-        self.convert_units = convert_units
+        self.convert_to_SI_units = convert_to_SI_units
         self.get_species()
         self.populate_reaction_list()
 
@@ -110,17 +110,17 @@ class XMLParser:
             a string representation of reaction equation
         """
         rxn_equation = reaction.find('equation').text
-        return rxn_equation
+        return rxn_equation   
 
     def get_rate_coeffs_components(self, reaction):
         """Helper function that returns reaction rate coefficient components
         based on type of coefficient.
-        
+
         Args:
         =====
         reaction : xml.etree.ElementTree.Element, required
             <reaction> XML element containing information about a reaction
-        convert_units : boolean, optional (default False)
+        convert_to_SI_units : boolean, optional (default False)
             converts units if True
 
 
@@ -129,7 +129,7 @@ class XMLParser:
         rate_coeffs_components : dict
             dictionary of the form {coefficient component name: coefficient component value}. 
         """
-        if self.convert_units:
+        if self.convert_to_SI_units:
             # Connect to csv file containing units
             units_file = os.path.join(THIS_DIRECTORY, 'units.csv')
             with open(units_file, 'r') as unit:
@@ -141,26 +141,28 @@ class XMLParser:
         # Loop over rateCoeff's and convert units where desired
         rateCoeffs = reaction.find('rateCoeff')
 
-        #output = []
         for rateCoeff in rateCoeffs:
+
             if rateCoeff.tag == 'Arrhenius':
+
                 # If 'Arrhenius' units are to be converted
-                if self.convert_units:
+                if self.convert_to_SI_units:
                     try:
                         A_unit = rateCoeff.find('A').attrib['units'].split('/')
                         E_unit = rateCoeff.find('E').attrib['units'].split('/')
                     except:
                         raise ValueError("Input file contains no units. " + 
-                                         "Set convert_units to False to continue")
+                                         "Set convert_to_SI_units to False to continue")
+                    
                     A_conv_lis = []
                     for unit in A_unit:
-                        print(unit)
                         try:
                             A_conv_lis.append(dict_[unit])
                         except:
                             raise NotImplementedError(unit +
                                                       " not implemented.")
                     A_conversion = numpy.prod(numpy.array(A_conv_lis))
+                    
                     E_conv_lis = []
                     for unit in E_unit:
                         try:
@@ -169,6 +171,7 @@ class XMLParser:
                             raise NotImplementedError(unit +
                                                       " not implemented.")
                     E_conversion = numpy.prod(numpy.array(E_conv_lis))
+                    
                     try:
                         A = float(rateCoeff.find('A').text)*A_conversion
                         E = float(rateCoeff.find('E').text)*E_conversion
@@ -176,10 +179,9 @@ class XMLParser:
                     except:
                         raise ValueError("Conversion failed. "
                                          "Resulting units have not been converted.")
-                    if rateCoeff.find('b') is not None:
-                        raise ValueError("Cannot use 'b' in Arrhenius type.")
+                
                 # If 'Arrhenius' units are not to be converted
-                if not self.convert_units:
+                if not self.convert_to_SI_units:
                     try:
                         A = float(rateCoeff.find('A').text)
                         E = float(rateCoeff.find('E').text)
@@ -187,10 +189,12 @@ class XMLParser:
                     except:
                         raise ValueError("Reaction coefficient parameters " +
                                          "not as expected.")
-                    if rateCoeff.find('b') is not None:
-                        raise ValueError("Cannot use 'b' in Arrhenius type.")
+                
+                if rateCoeff.find('b') is not None:
+                    raise ValueError("Cannot use 'b' in Arrhenius type.")
 
-            #elif rateCoeff.tag == 'modifiedArrhenius':
+
+
             elif rateCoeff.tag in ('modifiedArrhenius',
                                    'Kooij'):
                 kooij_name = ''
@@ -198,14 +202,15 @@ class XMLParser:
                     kooij_name = rateCoeff.attrib['name']
                 except:
                     kooij_name = None
+
                 # If 'modifiedArrhenius' units are to be converted
-                if self.convert_units:
+                if self.convert_to_SI_units:
                     try:
                         A_unit = rateCoeff.find('A').attrib['units'].split('/')
                         E_unit = rateCoeff.find('E').attrib['units'].split('/')
                     except:
                         raise ValueError("Input file contains no units. " + 
-                                         "Set convert_units to False to continue")
+                                         "Set convert_to_SI_units to False to continue")
                     A_conv_lis = []
                     for unit in A_unit:
                         try:
@@ -234,8 +239,9 @@ class XMLParser:
                                          "Resulting units have not been converted.")
                         # if rateCoeff.tag == 'Kooij':
                         #     d['name'] = kooij_name
+                
                 # If 'modifiedArrhenius' units are not to be converted
-                if not self.convert_units:
+                if not self.convert_to_SI_units:
                     try:
                         A = float(rateCoeff.find('A').text)
                         b = float(rateCoeff.find('b').text)
@@ -254,32 +260,10 @@ class XMLParser:
                 except:
                     raise ValueError("Non-numeric coefficient parameters.")
 
-            # elif rateCoeff.tag == 'efficiencies':
-            #     temp_list = [item.split(':') for item
-            #                  in rateCoeff.text.split(' ')]
-            #     efficiencies = dict()
-            #     efficiencies['Type'] = 'efficiencies'
-            #     for item in temp_list:
-            #         efficiencies[item[0]] = item[1]
-            #     efficiencies['default'] = rateCoeff.attrib['default']
-            #     d = efficiencies
-
-            # elif rateCoeff.tag == 'Troe':
-            #     alpha = float(rateCoeff.find('alpha').text)
-            #     t1 = float(rateCoeff.find('T1').text)
-            #     t2 = float(rateCoeff.find('T2').text)
-            #     t3 = float(rateCoeff.find('T2').text)
-
-            #     d = {'alpha': alpha,
-            #          't1': t1,
-            #          't2': t2,
-            #          't3': t3}
 
             else:
                 raise NotImplementedError(rateCoeff.tag + " not implemented.")
 
-            #output.append(d)
-        #return output
         return d
 
     def get_reactant_stoich_coeffs(self, reaction):
