@@ -10,33 +10,37 @@ from pychemkin.parsers import SQLParser
 class ReactionCoeff:
     """Class for (forward) reaction rate coefficient."""
     def __init__(self, k_parameters, T=None):
-        """Initializes reaction rate coefficient.
+        """Initializes forward reaction rate coefficient.
 
-        INPUTS:
-        -------
+        Args:
+        =====
         k_parameters : dictionary, required
             Dictionary of parameters to compute reaction rate coefficient
         T : int or float
             Temperature of reaction, in Kelvin (default: None,
             in case rxn rate coefficient is temperature-independent)
+
+        Attributes:
+        ===========
+        k : float
+            Computed forward reaction rate coefficient
         """
         self.k_parameters = k_parameters
         self.T = T
-        self.k = self.get_coeff(self.k_parameters, self.T)
+        self.k = self.compute_coefficient(self.k_parameters, self.T)
 
-    def get_coeff(self, k_parameters, T):
-        """Computes reaction rate coefficients
-        using passed parameters.
+    def compute_coefficient(self, k_parameters, T):
+        """Computes reaction rate coefficient using passed parameters.
 
-        INPUTS:
-        -------
+        Args:
+        =====
         k_parameters : dictionary
             Dictionary of parameters to compute rxn rate coefficient
         T : int or float
             Temperature of the reaction, in Kelvin
         
-        RETURNS:
-        --------
+        Returns:
+        ========
         k : int or float
             Reaction rate coefficient
 
