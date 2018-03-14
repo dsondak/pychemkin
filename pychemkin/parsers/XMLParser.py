@@ -205,7 +205,7 @@ class XMLParser:
             raise ValueError("Conversion failed. "
                              "Resulting units have not been converted.")
 
-        if rate_coeff.find('R'):
+        if rate_coeff.find('R') is not None:
             try:
                 R = float(rate_coeff.find('R').text)
             except:

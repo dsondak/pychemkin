@@ -168,6 +168,16 @@ def test_unit_check_4_arr():
     assert numpy.isclose(A, 35200)
     assert numpy.isclose(E, 298737.6)
 
+def test_unit_check_4_arr_with_R():
+    xml_filename = "tests/test_xml_files/unit_check_arr_with_R.xml"
+    parser = XMLParser(xml_filename, convert_to_SI_units=False)
+    A = parser.reaction_list[0].rate_coeffs_components['A']
+    E = parser.reaction_list[0].rate_coeffs_components['E']
+    R = parser.reaction_list[0].rate_coeffs_components['R']
+    assert numpy.isclose(A, 3.52e+10)
+    assert numpy.isclose(E, 7.14e+04)
+    assert numpy.isclose(R, 8.3144598)
+
 def test_unit_check_4_mod_arr():
     xml_filename = "tests/test_xml_files/unit_check_modarr.xml"
     parser = XMLParser(xml_filename, convert_to_SI_units=True)
@@ -177,6 +187,16 @@ def test_unit_check_4_mod_arr():
     assert numpy.isclose(A, 35200)
     assert numpy.isclose(E, 298737.6)
     assert numpy.isclose(b, 2.7)
+
+def test_unit_conversion_fail_arr_onlyE_units():
+    xml_filename = "tests/test_xml_files/unit_conversion_fail_arr_onlyEunits.xml"
+    with pytest.raises(ValueError):
+        parser = XMLParser(xml_filename, convert_to_SI_units=True)
+
+def test_unit_conversion_fail_invalid_R():
+    xml_filename = "tests/test_xml_files/unit_conversion_fail_arr_invalidR.xml"
+    with pytest.raises(ValueError):
+        parser = XMLParser(xml_filename, convert_to_SI_units=True)
 
 def test_unit_conversion_fail_arr():
     xml_filename = "tests/test_xml_files/unit_conversion_fail_arr_A.xml"
