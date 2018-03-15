@@ -99,3 +99,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+#Some interim files
+/pychemkin/thermo_database/do_not_push
