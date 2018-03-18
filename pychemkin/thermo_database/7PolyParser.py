@@ -38,7 +38,7 @@ class Parser_7_coeffs:
 
     def __init__(self,f='7poly_scrapper_output.txt'):
         self.txt_file = f
-
+        
     def species_txt_to_dict(self):
         #read the file
         file = open(self.txt_file,'r')
@@ -47,6 +47,7 @@ class Parser_7_coeffs:
         species_info = {}
 
         #iterate over lines
+        miss = 0
         for line in lines:
             #spilt the line
             strings = line.split()
@@ -58,8 +59,32 @@ class Parser_7_coeffs:
             #find line with species
             if strings[-1] == '1':
                 #get species name
+                    
                 specie = strings[0]
                 specie_state = strings[1]
+                
+                # get species molec weight
+                
+                if strings[-3] in ['A','B','C','D','E','F','G']:
+                    specie_weight = float(strings[-2][-8:])
+                    #print(specie_weight)
+                else:
+                    
+                    if strings[-3] in ['6000.000','5000.000']:
+                        #print(strings[-2][-8:])
+                        specie_weight = float(strings[-2][-8:])
+                    elif strings[-3] in ['ROTATIONS','IA=9.4815']:
+                        specie_weight = None
+                        miss +=1
+                        #print('miss',miss)
+                        #print(50*"-")
+                    else:
+                        
+                        #print(strings[-3])
+                        #print(strings[-2][-8:])
+                        #print(50*"-")
+                        specie_weight = float(strings[-2][-8:])
+                        
 
                 #get the low temp min and max
                 low_min = strings[-4]
@@ -97,13 +122,14 @@ class Parser_7_coeffs:
                 low_coeffs.extend(strings[0:-1])
 
                 #Add to dictionary
-                species_info[specie,specie_state]={'low':{},'high':{}}
-                species_info[specie,specie_state]['low']['Tmax'] = low_max
-                species_info[specie,specie_state]['low']['Tmin'] = low_min
-                species_info[specie,specie_state]['low']['coeffs'] = low_coeffs
-                species_info[specie,specie_state]['high']['Tmax'] = high_max
-                species_info[specie,specie_state]['high']['Tmin'] = high_min
-                species_info[specie,specie_state]['high']['coeffs'] = high_coeffs
+                species_info[specie,specie_state,specie_weight]={'low':{},'high':{}}
+                species_info[specie,specie_state,specie_weight]['low']['Tmax'] = low_max
+                species_info[specie,specie_state,specie_weight]['low']['Tmin'] = low_min
+                species_info[specie,specie_state,specie_weight]['low']['coeffs'] = low_coeffs
+                species_info[specie,specie_state,specie_weight]['high']['Tmax'] = high_max
+                species_info[specie,specie_state,specie_weight]['high']['Tmin'] = high_min
+                species_info[specie,specie_state,specie_weight]['high']['coeffs'] = high_coeffs
+                
         return species_info
 
     def prettify(self, elem):
@@ -128,7 +154,7 @@ class Parser_7_coeffs:
             specie = Element('specie')
             specie.set('name',str(k[0]))
             specie.set('state',str(k[1]))
-            specie.set('Mweight','N/A')
+            specie.set('Mweight',str(k[2]))
 
             thermo = SubElement(specie, 'thermo')
 
@@ -157,44 +183,7 @@ class Parser_7_coeffs:
         f.close()
 
         return result
-    
-    def molec_weights_to_xml(self):
-        
-        #create root for xml file
-        root = Element('SpecieMolecularWeights')
-        root.set('id','Species Molecular Weights')
-        comment = Comment('Created by Filip Michalsky')
-        root.append(comment)
-        
-        with open('Molecular_weights.txt', 'r') as fp:
-            data = json.load(fp)
 
-        for key in data:
-            #create a specie entry in xml
-            specie = Element('specie')
-            specie.set('name',key)
-            
-            #specie.set('state',str(k[1]))
-            #specie.set('Mweight','N/A')
-            #thermo = SubElement(specie, 'thermo')
-
-            WEIGHT = SubElement(specie, 'Weight')
-            #WEIGHT.set('Value',str(data[key]))
-            WEIGHT.text = str(data[key])
-            #weight_specie = SubElement(specie, 'weight')
-            #weight_specie.text = ('name',"data")
-
-            #add specie to root
-            root.append(specie)
-            
-        #print(root)
-        result = self.prettify(root)
-        f = open("Molec_weights.xml","w")
-        f.write(result)
-        f.close()
-
-        return root
-    
     def create_tables(self):
         pd.set_option('display.width', 500)
         pd.set_option('display.max_columns', 100)
@@ -204,13 +193,13 @@ class Parser_7_coeffs:
         self.cursor = db.cursor()
         self.cursor.execute("DROP TABLE IF EXISTS LOW")
         self.cursor.execute("DROP TABLE IF EXISTS HIGH")
-        self.cursor.execute("DROP TABLE IF EXISTS WEIGHTS")
         self.cursor.execute("PRAGMA foreign_keys=1")
 
         #Create High and Low tables
         self.cursor.execute('''CREATE TABLE LOW (
                        SPECIES_NAME TEXT NOT NULL,
                        STATE TEXT NOT NULL,
+                       MOLEC_WEIGHT TEXT NOT NULL,
                        TLOW TEXT NOT NULL,
                        THIGH TEXT NOT NULL,
                        COEFF_1 TEXT NOT NULL,
@@ -222,11 +211,10 @@ class Parser_7_coeffs:
                        COEFF_7 TEXT NOT NULL,
                        COEFF_8 TEXT NOT NULL)''')
 
-        # Commit changes to the database
-        db.commit()
         self.cursor.execute('''CREATE TABLE HIGH (
                        SPECIES_NAME TEXT NOT NULL,
                        STATE TEXT NOT NULL,
+                       MOLEC_WEIGHT TEXT NOT NULL,
                        TLOW TEXT NOT NULL,
                        THIGH TEXT NOT NULL,
                        COEFF_1 TEXT NOT NULL,
@@ -236,10 +224,7 @@ class Parser_7_coeffs:
                        COEFF_5 TEXT NOT NULL,
                        COEFF_6 TEXT NOT NULL,
                        COEFF_7 TEXT NOT NULL)''')
-        db.commit()
-        self.cursor.execute('''CREATE TABLE WEIGHTS (
-                       SPECIES_NAME TEXT NOT NULL,
-                       MOLEC_WEIGHT TEXT NOT NULL)''')
+
 
         # Commit changes to the database
         db.commit()
@@ -247,7 +232,7 @@ class Parser_7_coeffs:
         #create xml & db
         self.create_tables()
         self.species_dict_to_xml()
-        self.molec_weights_to_xml()
+
         
         #Get the xml
         tree = ET.parse('7poly.xml')
@@ -259,6 +244,7 @@ class Parser_7_coeffs:
         for specie in species:
             name = specie.get('name')
             state = specie.get('state')
+            weight = specie.get('Mweight')
 
             #get low temp high/low and coeffs for each specie
             NASA = specie.find('thermo').findall('NASA')
@@ -271,39 +257,39 @@ class Parser_7_coeffs:
             lows = NASA[0].find('floatArray').text.split()
             if(len(lows) > 7):
                 Low_C_1,Low_C_2,Low_C_3,Low_C_4,Low_C_5,Low_C_6,Low_C_7,Low_C_8 = lows[0:8]
-                lows_to_insert = (name,state,low_tmin,low_tmax,Low_C_1.strip(','),Low_C_2.strip(','),Low_C_3.strip(','),Low_C_4.strip(','),Low_C_5.strip(','),Low_C_6.strip(','),Low_C_7.strip(','),Low_C_8.strip(','))
+                lows_to_insert = (name,state,weight,low_tmin,low_tmax,Low_C_1.strip(','),Low_C_2.strip(','),Low_C_3.strip(','),Low_C_4.strip(','),Low_C_5.strip(','),Low_C_6.strip(','),Low_C_7.strip(','),Low_C_8.strip(','))
             else:
                 Low_C_1,Low_C_2,Low_C_3,Low_C_4,Low_C_5,Low_C_6,Low_C_7 = lows[0:7]
-                lows_to_insert = (name,state,low_tmin,low_tmax,Low_C_1.strip(','),Low_C_2.strip(','),Low_C_3.strip(','),Low_C_4.strip(','),Low_C_5.strip(','),Low_C_6.strip(','),Low_C_7.strip(','),"")
+                lows_to_insert = (name,state,weight,low_tmin,low_tmax,Low_C_1.strip(','),Low_C_2.strip(','),Low_C_3.strip(','),Low_C_4.strip(','),Low_C_5.strip(','),Low_C_6.strip(','),Low_C_7.strip(','),"")
 
             #get low info
             high_tmax = NASA[1].get('Tmax')
             high_tmin = NASA[1].get('Tmin')
             High_C_1,High_C_2,High_C_3,High_C_4,High_C_5,High_C_6,High_C_7 = NASA[1].find('floatArray').text.strip(',').split()[0:7]
-            high_to_insert = name,state,high_tmin,high_tmax,High_C_1.strip(','),High_C_2.strip(','),High_C_3.strip(','),High_C_4.strip(','),High_C_5.strip(','),High_C_6.strip(','),High_C_7.strip(',')
+            high_to_insert = name,state,weight,high_tmin,high_tmax,High_C_1.strip(','),High_C_2.strip(','),High_C_3.strip(','),High_C_4.strip(','),High_C_5.strip(','),High_C_6.strip(','),High_C_7.strip(',')
 
             #Insert the values for each species into table
             self.cursor.execute('''INSERT INTO LOW
-                          (SPECIES_NAME, STATE, TLOW, THIGH, COEFF_1, COEFF_2,COEFF_3,COEFF_4,COEFF_5,COEFF_6,COEFF_7, COEFF_8)
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', lows_to_insert)
+                          (SPECIES_NAME, STATE,MOLEC_WEIGHT, TLOW, THIGH, COEFF_1, COEFF_2,COEFF_3,COEFF_4,COEFF_5,COEFF_6,COEFF_7, COEFF_8)
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', lows_to_insert)
             self.cursor.execute('''INSERT INTO HIGH
-                          (SPECIES_NAME, STATE, TLOW, THIGH, COEFF_1, COEFF_2,COEFF_3,COEFF_4,COEFF_5,COEFF_6,COEFF_7)
-                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', high_to_insert)
+                          (SPECIES_NAME, STATE,MOLEC_WEIGHT, TLOW, THIGH, COEFF_1, COEFF_2,COEFF_3,COEFF_4,COEFF_5,COEFF_6,COEFF_7)
+                          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', high_to_insert)
 
-        ### Insert table of molecular weights
-        tree = ET.parse('Molec_weights.xml')
-        root = tree.getroot()
-        #get species
-        species = root.findall('specie')
 
-        for specie in species:
-            name = specie.get('name')
-            weight = specie.find('Weight')
-            val = weight.text
-            vals_to_insert = name,val
-            self.cursor.execute('''INSERT INTO WEIGHTS
-                                  (SPECIES_NAME, MOLEC_WEIGHT)
-                                  VALUES (?, ?)''', vals_to_insert)
         db.commit()
     def create_sql_db(self):
           self.species_xml_to_db()
+
+
+'''
+if __name__ == "__main__":
+    import doctest
+    from bs4 import BeautifulSoup
+    import requests
+    import numpy as np
+    import sys
+    import time
+    import json
+    doctest.testmod(verbose=True)
+'''

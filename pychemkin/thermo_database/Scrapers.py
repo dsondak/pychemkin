@@ -77,7 +77,10 @@ class Scraper_7_coeffs:
         f.close()
         return self.result
 
+        '''
     def scrape_species_molecular_weights(self,range_of_weights,query_lag,save_txt=False):
+
+
         self.range_of_weights = range_of_weights
         self.query_lag = query_lag
         self. save_txt = save_txt
@@ -147,7 +150,7 @@ class Scraper_7_coeffs:
         
         self.molec_weights = molec_weights_dict
         return molec_weights_dict
-
+    '''
 
 
 if __name__ == "__main__":
