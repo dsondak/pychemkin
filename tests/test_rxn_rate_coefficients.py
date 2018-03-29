@@ -12,9 +12,36 @@ from pychemkin.rxn_rate_coefficients.rxn_rate_coefficients import *
 
 # ===== Tests for forward reaction rate coefficients ===== #
 
+def test_unhandled_rxn_rate_coeff_type():
+    """Test invalid/unhandled rxn rate coefficient type."""
+    rate_coeffs_type = "madeup type"
+    with pytest.raises(KeyError):
+        test = determine_rxn_rate_coeff_type(rate_coeffs_type)
+
+def test_invalid_components():
+    """Test reaction rate coefficients when
+    invalid/unhandled component in dictionary."""
+
+    # constant
+    k_parameters = {'sdfs': 10}
+    with pytest.raises(ValueError):
+        k_test = ConstantFwdCoeff(k_parameters)
+
+    # Arrhenius
+    k_parameters = {'sdfdds': 10, 'E': 10**3}
+    T = 10
+    with pytest.raises(ValueError):
+        k_test = ArrheniusFwdCoeff(k_parameters, T)
+
+    # modified Arrhenius
+    k_parameters = {'sdfdds': 10, 'E': 10**3, 'b': 10}
+    T = 10
+    with pytest.raises(ValueError):
+        k_test = ArrheniusFwdCoeff(k_parameters, T)
+
 def test_invalid_or_extra_components():
     """Test reaction rate coefficients when
-    unused/invalid component in dictionary."""
+    extra component in dictionary."""
 
     # constant
     k_parameters = {'k': 10, 'q':8}
@@ -22,12 +49,22 @@ def test_invalid_or_extra_components():
         k_test = ConstantFwdCoeff(k_parameters).k
 
     # Arrhenius
+    k_parameters = {'A': 10**7, 'E':10**3, 'R': 8.3144598, 'madeup':120}
+    T = 10
+    with pytest.warns(UserWarning):
+        k_test = ArrheniusFwdCoeff(k_parameters, T).k
+
     k_parameters = {'A': 10**7, 'E':10**3, 'madeup':120}
     T = 10
     with pytest.warns(UserWarning):
         k_test = ArrheniusFwdCoeff(k_parameters, T).k
 
     # modified Arrhenius
+    k_parameters = {'A': 10**7, 'E':10**3, 'b':0.5, 'madeup':120, 'R': 8.3144598}
+    T = 10
+    with pytest.warns(UserWarning):
+        k_test = ModifiedArrheniusFwdCoeff(k_parameters, T).k
+
     k_parameters = {'A': 10**7, 'E':10**3, 'b':0.5, 'madeup':120}
     T = 10
     with pytest.warns(UserWarning):

@@ -30,6 +30,8 @@ class ElementaryReaction:
         rate_coeffs_components : dict, required
             Dictionary of components (e.g. 'A', 'b', 'E')
             to compute reaction rate coefficients
+        rxn_rate_coeffs_type : str, required
+            Type of reaction rate coefficient (e.g. 'constant', 'arrhenius', 'modified arrhenius')
         rxn_equation : str, required
             String representation of reaction equation
         reactant_stoich_coeffs : dict[int], required

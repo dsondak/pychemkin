@@ -264,14 +264,7 @@ class XMLParser:
             raise ValueError("Conversion failed. "
                              "Resulting units have not been converted.")
 
-        if rate_coeff.find('R'):
-            try:
-                R = float(rate_coeff.find('R').text)
-            except:
-                raise ValueError("R failed to be added. Please check your XML file.")
-            rxn_rate_coeffs_components['R'] = R
         return rxn_rate_coeffs_components
-
 
     def get_rate_coeffs_components(self, reaction):
         """Helper function that returns reaction rate coefficient components
@@ -288,7 +281,9 @@ class XMLParser:
         RETURNS:
         --------
         rxn_rate_coeffs_components : dict
-            dictionary of the form {coefficient component name: coefficient component value}. 
+            Dictionary of the form {coefficient component name: coefficient component value}
+        rxn_rate_coeffs_type : str
+            Type of reaction rate coefficient
         """
         unit_conversion = self.access_units()
 

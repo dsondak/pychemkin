@@ -4,26 +4,22 @@
 import numpy
 import pytest
 import warnings
+warnings.simplefilter("error")
 
 from pychemkin.reactions.Reactions import *
 
-# Treat warnings like errors (for testing purposes)
-warnings.simplefilter("error")
-
-
-# ======================= TESTS FOR REACTION OBJECT ====================== #
 
 @pytest.fixture
 def test_base_reaction():
-    """Returns a valid reaction (from rxns.xml)"""
+    """Returns a valid reaction setup (from rxns.xml)"""
     return ElementaryReaction(rxn_type="Elementary",
-                    is_reversible=False,
-                    rxn_equation="H2 + OH =] H2O + H",
-                    species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
-                    rate_coeffs_components={'k': 10},
-                    rate_coeffs_type='constant',
-                    reactant_stoich_coeffs={'H2' :1, 'OH':1},
-                    product_stoich_coeffs={'H2O' :1, 'H':1})
+                              is_reversible=False,
+                              rxn_equation="H2 + OH =] H2O + H",
+                              species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
+                              rate_coeffs_components={'k': 10},
+                              rate_coeffs_type='constant',
+                              reactant_stoich_coeffs={'H2' :1, 'OH':1},
+                              product_stoich_coeffs={'H2O' :1, 'H':1})
 
 def test_Reaction_special_fcns(test_base_reaction):
     """Test special functions for Reaction object"""

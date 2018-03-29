@@ -1,21 +1,30 @@
 
 """Classes for reaction rate coefficients."""
 
-import numbers
 import numpy
 import warnings
 from pychemkin.config import R_VALUE
 from pychemkin.parsers import SQLParser
 
 
-# class RxnRateCoefficientTypes(Enum):
-#     """Class to set symbolic names for the
-#     types of reaction rate coefficient."""
-#     CONSTANT = 1
-#     ARRHENIUS = 2
-#     MODIFIEDARRHENIUS = 3
-
 def determine_rxn_rate_coeff_type(type_name):
+    """Helper function to determine type of
+    (forward) reaction rate coefficient.
+
+    Args:
+    =====
+    type_name : str, required
+        Type of reaction rate coefficient
+
+    Returns:
+    ========
+    rxn_rate_coeff_obj : ForwardReactionCoeff
+        Corresponding reaction rate coefficient object
+
+    Notes:
+    ======
+        - Raises KeyError if invalid type_name
+    """
     try:
         rxn_rate_coeff_obj = ({'constant': ConstantFwdCoeff,
                               'arrhenius': ArrheniusFwdCoeff,
@@ -27,13 +36,22 @@ def determine_rxn_rate_coeff_type(type_name):
 
 class ForwardReactionCoeff:
     """Base class for reaction rate coefficients.
-    
+
     Methods:
     ========
-    compute_coefficient() : Calculates and returns the reaction
-        rate coefficient. To be implemented by subclasses.
+    compute_fwd_coefficient() : Calculates and returns the forward reaction
+    rate coefficient. To be implemented by subclasses.
     """
     def __init__(self, k_parameters, T=None):
+        """Initializes foward reaction rate coefficient.
+        
+        Args:
+        =====
+        k_parameters : dict, required
+            Dictionary of parameters to compute the reaction rate coefficient
+        T : float, optional (default: None)
+            Temperature of reaction
+        """
         self.k_parameters = k_parameters
         self.T = T
 
@@ -56,6 +74,8 @@ class ConstantFwdCoeff(ForwardReactionCoeff):
         =====
         k_parameters : dictionary, required
             Dictionary of components to compute rxn rate coefficient
+        T : float, optional (default: None)
+            Temperature of reaction
 
         Attributes:
         ===========
@@ -65,13 +85,13 @@ class ConstantFwdCoeff(ForwardReactionCoeff):
         Notes:
         ======
             - Raises ValueError if rxn rate coefficient component 'k' not found in dictionary
+            - Raises UserWarning if extra key-value pair(s) in component dictionary
         """
         super().__init__(k_parameters, T)
         if "k" not in self.k_parameters:
             raise ValueError("Component 'k' not found in dictionary.")
         if len(self.k_parameters) != 1:
             warnings.warn("Invalid/unused keys in dictionary.")
-        
         self.k = self.compute_fwd_coefficient()
 
     def compute_fwd_coefficient(self):
@@ -112,6 +132,7 @@ class ArrheniusFwdCoeff(ForwardReactionCoeff):
         Notes:
         ======
             - Raises ValueError if invalid keys in rxn rate component dictionary
+            - Raises UserWarning if extra key-value pair(s) in component dictionary
         """
         super().__init__(k_parameters, T)
         if ("A" in k_parameters and "E" in k_parameters and "b" not in k_parameters):
@@ -216,6 +237,7 @@ class ModifiedArrheniusFwdCoeff(ForwardReactionCoeff):
         Notes:
         ======
             - Raises ValueError if invalid keys in rxn rate component dictionary
+            - Raises UserWarning if extra key-value pair(s) in component dictionary
         """
         super().__init__(k_parameters, T)
         if ("A" in k_parameters and "E" in k_parameters and "b" in k_parameters):
@@ -299,7 +321,7 @@ class ModifiedArrheniusFwdCoeff(ForwardReactionCoeff):
         if (T <= 0):
             raise ValueError("Parameter 'T' must be positive.")
         
-        if (isinstance(b, numbers.Real)) == False:
+        if (isinstance(b, complex)) == True:
             raise TypeError("Parameter 'b' must be a real number.")
         
         if (R <= 0):
@@ -344,10 +366,10 @@ class NASA7BackwardCoeff(BackwardReactionCoeff):
         =====
         nui : numpy.ndarray
             stoichiometric coefficient difference (stoich_products - stoich_reactants)
-                for a single reversible reaction
+            for a single reversible reaction
         nasa7_coeffs : numpy.ndarray
             NASA polynomial coefficients (from appropriate temperature range)
-                corresponding to species in reversible reaction
+            corresponding to species in reversible reaction
 
         Attributes:
         ===========
