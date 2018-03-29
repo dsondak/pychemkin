@@ -290,7 +290,6 @@ class XMLParser:
         rxn_rate_coeffs_components : dict
             dictionary of the form {coefficient component name: coefficient component value}. 
         """
-        #if self.convert_to_SI_units:
         unit_conversion = self.access_units()
 
         rateCoeffs = reaction.find('rateCoeff')
@@ -298,10 +297,10 @@ class XMLParser:
 
             if rateCoeff.tag == 'Arrhenius':
                 rxn_rate_coeffs_components = self.get_arrhenius_components(rateCoeff, unit_list=unit_conversion)
-
+                rxn_rate_coeffs_type = 'arrhenius'
             elif rateCoeff.tag in ('modifiedArrhenius', 'Kooij'):
                 rxn_rate_coeffs_components = self.get_mod_arrhenius_components(rateCoeff, unit_list=unit_conversion)
-
+                rxn_rate_coeffs_type = 'modified arrhenius'
             elif rateCoeff.tag == 'Constant':
                 try:
                     k = float(rateCoeff.find('k').text)
@@ -309,11 +308,12 @@ class XMLParser:
                 except:
                     raise ValueError("Constant rxn rate coefficient, k failed to be added. "
                                      "Please check your XML file.")
+                rxn_rate_coeffs_type = 'constant'
 
             else:
                 raise NotImplementedError("{0} is not implemented.".format(rateCoeff.tag))
 
-        return rxn_rate_coeffs_components
+        return rxn_rate_coeffs_components, rxn_rate_coeffs_type
 
     def get_stoich_coefficients(self, species_type, reaction):
         """Helper function that returns stoichiometric coefficients
@@ -386,19 +386,25 @@ class XMLParser:
                 is_reversible = self.get_is_reversible(reaction) 
                 rxn_type = self.get_rxn_type(reaction)
                 rxn_equation = self.get_rxn_equation(reaction)
-                rate_coeffs_components = self.get_rate_coeffs_components(reaction)
+                rate_coeffs_components, rate_coeffs_type = self.get_rate_coeffs_components(reaction)
                 reactant_stoich_coeffs = self.get_reactant_stoich_coeffs(reaction)
                 product_stoich_coeffs = self.get_product_stoich_coeffs(reaction)
 
                 if is_reversible == False and rxn_type == "Elementary":
-                    rxn = IrrevElemReaction(rxn_type, is_reversible, rxn_equation,
-                                            species, rate_coeffs_components,
-                                            reactant_stoich_coeffs, product_stoich_coeffs)
+                    rxn = IrrevElemReaction(rxn_type=rxn_type, is_reversible=is_reversible,
+                                            rxn_equation=rxn_equation,
+                                            species_list=species, rate_coeffs_components=rate_coeffs_components,
+                                            rate_coeffs_type=rate_coeffs_type,
+                                            reactant_stoich_coeffs=reactant_stoich_coeffs,
+                                            product_stoich_coeffs=product_stoich_coeffs)
 
                 elif is_reversible == True and rxn_type == "Elementary":
-                    rxn = RevElemReaction(rxn_type, is_reversible, rxn_equation,
-                                          species, rate_coeffs_components,
-                                          reactant_stoich_coeffs, product_stoich_coeffs)
+                    rxn = RevElemReaction(rxn_type=rxn_type, is_reversible=is_reversible,
+                                            rxn_equation=rxn_equation,
+                                            species_list=species, rate_coeffs_components=rate_coeffs_components,
+                                            rate_coeffs_type=rate_coeffs_type,
+                                            reactant_stoich_coeffs=reactant_stoich_coeffs,
+                                            product_stoich_coeffs=product_stoich_coeffs)
 
                 # Unhandled reaction case
                 else:

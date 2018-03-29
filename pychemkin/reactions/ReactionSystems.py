@@ -1,35 +1,31 @@
 
-"""Module for setting up reaction system."""
+"""Class for a system of reactions."""
 
 import numpy
 
 from pychemkin.reactions.Reactions import *
-from pychemkin.rxn_rate_coefficients.rxn_rate_coefficients import ReactionCoeff
 
 # from scipy.integrate import ode
 
-class ReactionSystemError(Exception):
-    """Class for ReactionSystem-related errors."""
-    pass
 
-class ReactionSystem(object):
-    """Class for a system of reactions extracted from an xml file"""
+class ReactionSystem:
+    """Class for a system of reactions."""
     def __init__(self, reaction_list, NASA_poly_coefs, temperature, concentrations):
-        """Initializes ReactionSystem.
+        """Initializes a reaction system.
         
-        INPUTS:
-        -------
-        reaction_list : list[Reaction] or list[Reaction-like]
+        Args:
+        =====
+        reaction_list : list[Reaction] or list[Reaction-inherited]
             list of Reaction or Reaction-inherited objects
-        NASA_poly_coefs : 
+        NASA_poly_coefs :  
 
-        temp : numeric type
-            temperature of reaction
+        temperatures : numeric type or array of numeric types
+            temperatures of reaction
         concentrations : dict
-            dictionary of concentrations with key as species name
+            dictionary of concentrations (in molar) with key as species name
 
-        ATTRIBUTES:
-        -----------
+        Attributes:
+        ===========
         involved_species : list[str]
             list of all species in reaction system
         """
@@ -61,12 +57,12 @@ class ReactionSystem(object):
 
 
     def get_reaction_rate(self):
-        """Fetches reaction rate for each reaction.
+        """Returns reaction rate for each reaction.
 
-        RETURNS:
-        --------
+        Returns:
+        ========
         list_rxn_rates : list[float]
-            list of reaction rates of reactions in the system
+            List of reaction rates of reactions in the system
         """
         reaction_rate_list = [rxnObj.compute_reaction_rate() for rxnObj in self.reaction_list]
         reaction_rate_list = numpy.array(reaction_rate_list)
@@ -74,21 +70,18 @@ class ReactionSystem(object):
         return rxnrates
 
     def sort_reaction_rates(self):
-        """
-        sort the reaction rate and put it into dictionary format
+        """Sorts the reaction rates and returns them as
+        a dictionary.
 
-        RETURNS:
-        --------
-        rxn_rates_dict: The sorted dictionary of reaction rate
+        Returns:
+        ========
+        rxn_rates_dict: Sorted dictionary of reaction rate
         """
         rxn_rates_dict = {}
         list_species_ordered = list(self.involved_species)
         rxnrate = self.get_reaction_rate()
-
         for i in range(len(rxnrate)):
             rxn_rates_dict[list_species_ordered[i]] = rxnrate[i]
-
-
         return rxn_rates_dict
 
     def get_nasa_matrix(self, NASA_poly_coeff):

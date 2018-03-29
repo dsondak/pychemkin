@@ -1,12 +1,11 @@
 
-"""Test module for """
+"""Test module for reactions."""
 
 import numpy
 import pytest
 import warnings
 
 from pychemkin.reactions.Reactions import *
-from pychemkin.rxn_rate_coefficients.rxn_rate_coefficients import ReactionCoeff
 
 # Treat warnings like errors (for testing purposes)
 warnings.simplefilter("error")
@@ -22,6 +21,7 @@ def test_base_reaction():
                     rxn_equation="H2 + OH =] H2O + H",
                     species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
                     rate_coeffs_components={'k': 10},
+                    rate_coeffs_type='constant',
                     reactant_stoich_coeffs={'H2' :1, 'OH':1},
                     product_stoich_coeffs={'H2O' :1, 'H':1})
 
@@ -54,12 +54,12 @@ def test_Reaction_set_valid_temperature(test_base_reaction):
     test_base_reaction.set_temperature(10)
     assert test_base_reaction.temperature == 10
 
-def test_Reaction_order_dictionaries(test_base_reaction):
+def test_Reaction_get_ordered_list(test_base_reaction):
     """Test ordering of reaction"""
     # order of species_list : ['H', 'O', 'OH', 'H2', 'H2O', 'O2']
     some_dict = {'H2':1, 'OH':2, 'H2O':3, 'H':4}
     expected = [4, 2, 1, 3]
-    test_list = test_base_reaction.order_dictionaries(some_dict)
+    test_list = test_base_reaction.get_ordered_list(some_dict)
     assert test_list == expected
 
 def test_Reaction_set_concentrations(test_base_reaction):
@@ -110,6 +110,7 @@ def test_irrev_reaction():
                                 rxn_equation="H2 + OH =] H2O + H",
                                 species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
                                 rate_coeffs_components={'k': 10},
+                                rate_coeffs_type='constant',
                                 reactant_stoich_coeffs={'H2' :1, 'OH':1},
                                 product_stoich_coeffs={'H2O' :1, 'H':1})
 
@@ -121,6 +122,7 @@ def test_irrev_reaction_arrhenius():
                                 rxn_equation="H2 + OH =] H2O + H",
                                 species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
                                 rate_coeffs_components={'A': 10, 'E': 100, 'R':8.3144598},
+                                rate_coeffs_type='arrhenius',
                                 reactant_stoich_coeffs={'H2' :1, 'OH':1},
                                 product_stoich_coeffs={'H2O' :1, 'H':1})
 
@@ -132,6 +134,7 @@ def test_irrev_reaction_modified_arr():
                                 rxn_equation="H2 + OH =] H2O + H",
                                 species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
                                 rate_coeffs_components={'A': 10, 'E': 100, 'b':0.5, 'R':8.3144598},
+                                rate_coeffs_type='modified arrhenius',
                                 reactant_stoich_coeffs={'H2' :1, 'OH':1},
                                 product_stoich_coeffs={'H2O' :1, 'H':1})
 
@@ -143,6 +146,7 @@ def test_wrongly_classified_irrev_rxn_reversible():
                                     rxn_equation="H2 + OH =] H2O + H",
                                     species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
                                     rate_coeffs_components={'k': 10},
+                                    rate_coeffs_type='constant',
                                     reactant_stoich_coeffs={'H2' :1, 'OH':1},
                                     product_stoich_coeffs={'H2O' :1, 'H':1})
 
@@ -154,6 +158,7 @@ def test_wrongly_classified_irrev_rxn_nonElementary():
                                     rxn_equation="H2 + OH =] H2O + H",
                                     species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
                                     rate_coeffs_components={'k': 10},
+                                    rate_coeffs_type='constant',
                                     reactant_stoich_coeffs={'H2' :1, 'OH':1},
                                     product_stoich_coeffs={'H2O' :1, 'H':1})
 
@@ -175,6 +180,7 @@ def test_IrrevReaction_compute_reaction_rate_coeff_invalid_constant():
                                     rxn_equation="H2 + OH =] H2O + H",
                                     species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
                                     rate_coeffs_components={'k': -10},
+                                    rate_coeffs_type='constant',
                                     reactant_stoich_coeffs={'H2' :1, 'OH':1},
                                     product_stoich_coeffs={'H2O' :1, 'H':1})
     with pytest.raises(ValueError):
@@ -185,7 +191,7 @@ def test_IrrevReaction_compute_reaction_rate_coeff_arrhenius(test_irrev_reaction
     # when T not inputed by user
     try:
         k = test_irrev_reaction_arrhenius.compute_reaction_rate_coeff() 
-    except ValueError:
+    except TypeError:
         test_irrev_reaction_arrhenius.set_temperature(10)
         k = test_irrev_reaction_arrhenius.compute_reaction_rate_coeff()
     assert numpy.isclose(k, 3.0037488791204288)
@@ -195,7 +201,7 @@ def test_IrrevReaction_compute_reaction_rate_coeff_mod_arrhenius(test_irrev_reac
     # when T not inputed by user
     try:
         k = test_irrev_reaction_modified_arr.compute_reaction_rate_coeff() 
-    except ValueError:
+    except TypeError:
         test_irrev_reaction_modified_arr.set_temperature(10)
         k = test_irrev_reaction_modified_arr.compute_reaction_rate_coeff()
     assert numpy.isclose(k, 9.498687977198342)
@@ -208,6 +214,7 @@ def test_IrrevReaction_compute_progress_rate():
                                 rxn_equation="A + B =] C",
                                 species_list=['A', 'B', 'C'],
                                 rate_coeffs_components={'k': 10},
+                                rate_coeffs_type='constant',
                                 reactant_stoich_coeffs={'A' :2, 'B':1},
                                 product_stoich_coeffs={'C': 1})
     test.set_concentrations({'A': 1, 'B':2, 'C':3})
@@ -224,6 +231,7 @@ def test_IrrevReaction_compute_reaction_rate(test_irrev_reaction):
                                 rxn_equation="A + B =] C",
                                 species_list=['A', 'B', 'C'],
                                 rate_coeffs_components={'k': 10},
+                                rate_coeffs_type='constant',
                                 reactant_stoich_coeffs={'A' :2, 'B':1},
                                 product_stoich_coeffs={'C': 1})
     test.set_concentrations({'A': 1, 'B':2, 'C':3})
@@ -238,6 +246,7 @@ def test_IrrevReaction_compute_reaction_rate_neg_reactant_stoich_coeffs(test_irr
                                 rxn_equation="A + B =] C",
                                 species_list=['A', 'B', 'C'],
                                 rate_coeffs_components={'k': 10},
+                                rate_coeffs_type='constant',
                                 reactant_stoich_coeffs={'A' :2, 'B':-1},
                                 product_stoich_coeffs={'C': 1})
     test.set_concentrations({'A': 1, 'B':2, 'C':3})
@@ -251,6 +260,7 @@ def test_IrrevReaction_compute_reaction_rate_neg_product_stoich_coeffs(test_base
                                 rxn_equation="A + B =] C",
                                 species_list=['A', 'B', 'C'],
                                 rate_coeffs_components={'k': 10},
+                                rate_coeffs_type='constant',
                                 reactant_stoich_coeffs={'A' :2, 'B':1},
                                 product_stoich_coeffs={'C': -1})
     test.set_concentrations({'A': 1, 'B':2, 'C':3})
@@ -278,6 +288,7 @@ def test_rev_reaction():
                     rxn_equation="H + O2 [=] H2O ",
                     species_list=['H', 'H2O', 'O2'],
                     rate_coeffs_components={'k': 10},
+                    rate_coeffs_type='constant',
                     reactant_stoich_coeffs={'H' :2, 'O2':1},
                     product_stoich_coeffs={'H2O' :2})
 
@@ -289,6 +300,7 @@ def test_wrongly_classified_rev_rxn_irreversible():
                                     rxn_equation="H2 + OH =] H2O + H",
                                     species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
                                     rate_coeffs_components={'k': 10},
+                                    rate_coeffs_type='constant',
                                     reactant_stoich_coeffs={'H2' :1, 'OH':1},
                                     product_stoich_coeffs={'H2O' :1, 'H':1})
 
@@ -300,6 +312,7 @@ def test_wrongly_classified_rev_rxn_nonElementary():
                                     rxn_equation="H2 + OH =] H2O + H",
                                     species_list=['H', 'O', 'OH', 'H2', 'H2O', 'O2'],
                                     rate_coeffs_components={'k': 10},
+                                    rate_coeffs_type='constant',
                                     reactant_stoich_coeffs={'H2' :1, 'OH':1},
                                     product_stoich_coeffs={'H2O' :1, 'H':1})
 

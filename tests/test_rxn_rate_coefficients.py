@@ -5,237 +5,214 @@ import numpy
 import pytest
 
 import warnings
-# Treat warnings like errors (for testing purposes)
 warnings.simplefilter("error")
 
-from pychemkin.rxn_rate_coefficients.rxn_rate_coefficients import ReactionCoeff, BackwardReactionCoeff, NASA7BackwardCoeffs
+from pychemkin.rxn_rate_coefficients.rxn_rate_coefficients import *
 
 
-# ======================= TESTS FOR REACTIONCOEFF ====================== #
+# ===== Tests for forward reaction rate coefficients ===== #
 
+def test_invalid_or_extra_components():
+    """Test reaction rate coefficients when
+    unused/invalid component in dictionary."""
 
-def test_ReactionCoeff_constant():
-    """Test when reaction rate coefficient is constant"""
-    k_parameters = {'k': 10}
-    k_test = ReactionCoeff(k_parameters).k
-    assert k_test == 10
-
-def test_ReactionCoeff_unrecognized_const_k_component():
-    """Test when user defines unhandled reaction rate coefficient components"""
+    # constant
     k_parameters = {'k': 10, 'q':8}
-    with pytest.raises(NotImplementedError):
-        k_test = ReactionCoeff(k_parameters).k
+    with pytest.warns(UserWarning):
+        k_test = ConstantFwdCoeff(k_parameters).k
 
-def test_ReactionCoeff_unrecognized_arr_k_component():
-    """Test when user defines unhandled reaction rate coefficient components"""
+    # Arrhenius
     k_parameters = {'A': 10**7, 'E':10**3, 'madeup':120}
     T = 10
-    with pytest.raises(NotImplementedError):
-        k_test = ReactionCoeff(k_parameters, T).k
+    with pytest.warns(UserWarning):
+        k_test = ArrheniusFwdCoeff(k_parameters, T).k
 
-def test_ReactionCoeff_unrecognized_modarr_k_component():
-    """Test when user defines unhandled reaction rate coefficient components"""
+    # modified Arrhenius
     k_parameters = {'A': 10**7, 'E':10**3, 'b':0.5, 'madeup':120}
     T = 10
-    with pytest.raises(NotImplementedError):
-        k_test = ReactionCoeff(k_parameters, T).k
+    with pytest.warns(UserWarning):
+        k_test = ModifiedArrheniusFwdCoeff(k_parameters, T).k
 
-def test_ReactionCoeff_invalid_constant():
-    """Test when reaction rate coefficient is constant but invalid (non-positive)"""
+def test_constant_rxn_rate_coefficient():
+    """Tests for constant reaction rate coefficient."""
+
+    # Test when invalid constant (non-positive k)
     k_parameters = {'k': -10}
     with pytest.raises(ValueError):
-        k_test = ReactionCoeff(k_parameters).k
+        k_test = ConstantFwdCoeff(k_parameters).k
 
-def test_ReactionCoeff_constant_with_T():
-    """Test when reaction rate coefficient is constant but T entered for some reason
-    (should have no effect)"""
+    # Compute with valid input
     k_parameters = {'k': 10}
-    T = 10
-    k_test = ReactionCoeff(k_parameters, T).k
+    k_test = ConstantFwdCoeff(k_parameters).k
     assert k_test == 10
 
-def test_ReactionCoeff_arrhenius():
-    """Test when reaction rate coefficient is Arrhenius"""
-    k_parameters = {'A': 10**7, 'E':10**3, 'R':8.3144598}
-    T = 10**2
-    k_test = ReactionCoeff(k_parameters, T).k
-    assert numpy.isclose(k_test, 3003748.8791204286)
-
-def test_ReactionCoeff_arrhenius_invalid_A():
-    """Test when reaction rate coefficient is Arrhenius but A is invalid (non-positive)"""
-    k_parameters = {'A': 0, 'E':100, 'R':8.3144598}
+    # Test when T entered (no effect)
+    k_parameters = {'k': 10}
     T = 10
-    with pytest.raises(ValueError):
-        k_test = ReactionCoeff(k_parameters, T).k
-   
-def test_ReactionCoeff_arrhenius_T_not_set():
-    """Test when reaction rate coefficient is Arrhenius but T is not set by user"""
-    k_parameters = {'A': 10, 'E':100, 'R':8.3144598}
-    with pytest.raises(ValueError):
-        k_test = ReactionCoeff(k_parameters).k
+    k_test = ConstantFwdCoeff(k_parameters, T).k
+    assert k_test == 10
 
-def test_ReactionCoeff_arrhenius_invalid_T():
-    """Test when reaction rate coefficient is Arrhenius but T is invalid (non-positive)"""
+def test_arrhenius_rxn_rate_coefficient():
+    """Tests for Arrhenius reaction rate coefficient."""
+
+    # Test when missing argument T
     k_parameters = {'A': 10, 'E':100, 'R':8.3144598}
+    with pytest.raises(TypeError):
+        k_test = ArrheniusFwdCoeff(k_parameters).k
+
+    # Compute with valid inputs
+    k_parameters = {'A': 10**7, 'E': 10**3, 'R': 8.3144598}
+    T = 10**2
+    k_test = ArrheniusFwdCoeff(k_parameters, T).k
+    assert numpy.isclose(k_test, 3003748.8791204286, atol=1e-16)
+
+    # Test when invalid value for T (non-positive temperature)
+    k_parameters = {'A': 10, 'E': 100, 'R': 8.3144598}
     T = -10
     with pytest.raises(ValueError):
-        k_test = ReactionCoeff(k_parameters, T).k
+        k_test = ArrheniusFwdCoeff(k_parameters, T).k
 
-def test_ReactionCoeff_arrhenius_invalid_R():
-    """Test when reaction rate coefficient is Arrhenius but R is invalid (non-positive)"""
-    k_parameters = {'A': 10, 'E':100, 'R':-100}
+    # Test when invalid value for A (non-positive prefactor)
+    k_parameters = {'A': 0, 'E': 100, 'R': 8.3144598}
     T = 10
     with pytest.raises(ValueError):
-        k_test = ReactionCoeff(k_parameters, T).k
+        k_test = ArrheniusFwdCoeff(k_parameters, T).k
 
-def test_ReactionCoeff_arrhenius_changing_R():
-    """Test when reaction rate coefficient is Arrhenius but R is changed by user"""
-    k_parameters = {'A': 10, 'E':100, 'R':10.453}
+    # Test when invalid value for R (non-positive gas constant)
+    k_parameters = {'A': 10, 'E': 100, 'R': -100}
     T = 10
-    with pytest.raises(UserWarning):
-        k_test = ReactionCoeff(k_parameters, T).k
+    with pytest.raises(ValueError):
+        k_test = ArrheniusFwdCoeff(k_parameters, T).k
 
-def test_ReactionCoeff_mod_arrhenius():
-    """Test when reaction rate coefficient is modified Arrhenius"""
+    # Test when changing value of R
+    k_parameters = {'A': 10, 'E': 100, 'R': 10.453}
+    T = 10
+    with pytest.warns(UserWarning):
+        k_test = ArrheniusFwdCoeff(k_parameters, T).k
+
+def test_modified_arrhenius_rxn_rate_coefficient():
+    """Tests for Modified Arrhenius reaction rate coefficient."""
+
+    # Test when missing argument T
+    k_parameters = {'A': 10, 'E':100, 'b':0.5, 'R':8.3144598}
+    with pytest.raises(TypeError):
+        k_test = ModifiedArrheniusFwdCoeff(k_parameters).k
+
+    # Compute with valid inputs
     k_parameters = {'A': 10**7, 'E':10**3, 'b':0.5, 'R':8.3144598}
     T = 10**2
-    k_test = ReactionCoeff(k_parameters, T).k
-    assert numpy.isclose(k_test, 30037488.791204285)
+    k_test = ModifiedArrheniusFwdCoeff(k_parameters, T).k
+    assert numpy.isclose(k_test, 30037488.791204285, atol=1e-16)
 
-def test_ReactionCoeff_mod_arrhenius_invalid_A():
-    """Test when reaction rate coefficient is modified
-    Arrhenius but A is invalid (non-positive)"""
+    # Test when invalid value for A (non-positive prefactor)
     k_parameters = {'A': -10, 'E':100, 'b':0.5, 'R':8.3144598}
     T = 10
     with pytest.raises(ValueError):
-        k_test = ReactionCoeff(k_parameters, T).k
+        k_test = ModifiedArrheniusFwdCoeff(k_parameters, T).k
 
-def test_ReactionCoeff_mod_arrhenius_invalid_b():
-    """Test when reaction rate coefficient is modified
-    Arrhenius but B is invalid (not real)"""
+    # Test when invalid value for b (non-real constant)
     k_parameters = {'A': 10, 'E':100, 'b':0.5j, 'R':8.3144598}
     T = 10
     with pytest.raises(TypeError):
-        k_test = ReactionCoeff(k_parameters, T).k
-   
-def test_ReactionCoeff_mod_arrhenius_T_not_set():
-    """Test when reaction rate coefficient is modified
-    Arrhenius but T is not set by user"""
-    k_parameters = {'A': 10, 'E':100, 'b':0.5, 'R':8.3144598}
-    with pytest.raises(ValueError):
-        k_test = ReactionCoeff(k_parameters).k
+        k_test = ModifiedArrheniusFwdCoeff(k_parameters, T).k
 
-def test_ReactionCoeff_mod_arrhenius_invalid_T():
-    """Test when reaction rate coefficient is modified
-    Arrhenius but T is invalid (non-positive)"""
+    # Test when invalid value for T (non-positive temperature)
     k_parameters = {'A': 10, 'E':100, 'b':0.5, 'R':8.3144598}
     T = -10
     with pytest.raises(ValueError):
-        k_test = ReactionCoeff(k_parameters, T).k
+        k_test = ModifiedArrheniusFwdCoeff(k_parameters, T).k
 
-def test_ReactionCoeff_mod_arrhenius_invalid_R():
-    """Test when reaction rate coefficient is modified 
-    Arrhenius but R is invalid (non-positive)"""
+    # Test when invalid value for R (non-positive gas constant)
     k_parameters = {'A': 10, 'E':100, 'R':-100, 'b':0.5}
     T = 10
     with pytest.raises(ValueError):
-        k_test = ReactionCoeff(k_parameters, T).k
+        k_test = ModifiedArrheniusFwdCoeff(k_parameters, T).k
 
-def test_ReactionCoeff_mod_arrhenius_changing_R():
-    """Test when reaction rate coefficient is modified
-    Arrhenius but R is changed by user"""
+    # Test when changing value of R
     k_parameters = {'A': 10, 'E':100, 'R':10.453, 'b':0.5}
     T = 10
-    with pytest.raises(UserWarning):
-        k_test = ReactionCoeff(k_parameters, T).k
+    with pytest.warns(UserWarning):
+        k_test = ModifiedArrheniusFwdCoeff(k_parameters, T).k
 
 
+# ===== Tests for backward reaction rate coefficients ===== #
 
-
-
-
-
-# ======================= TESTS FOR BACKWARDCOEFF ====================== #
-
-def test_backward_coeff_baseclass():
+def test_backward_coefficient_base_class():
     """Test BackwardReactionCoeff class"""
     bkwd_coeff = BackwardReactionCoeff()
     with pytest.raises(NotImplementedError):
-        bkwd_coeff.compute_backward_coeffs()
+        bkwd_coeff.compute_bkwd_coefficient()
 
 @pytest.fixture
-def test_backward_coeff():
+def NASA7_backward_coeff_setup():
     """Returns a working (but artificial) example of
-    backward reaction rate coefficient."""
+    backward reaction rate coefficient using NASA
+    7 polynomial coefficients."""
     expected_nasa = numpy.array([[1,0,0,0,0,0,0],
                                 [1,0,0,0,0,0,0],
                                 [1,0,0,0,0,0,0]])
     k_f = 100
     nu_i = numpy.array([-2, -1, 2])
-    bkwd_coeff = NASA7BackwardCoeffs(nu_i, expected_nasa,
+    bkwd_coeff = NASA7BackwardCoeff(nu_i, expected_nasa,
                                      p0=1e5, R=8.3144598)
     return bkwd_coeff
 
-def test_backwardCoeff_changing_R():
-    """Test NASA7 backward coefficient where R is changed by user"""
+def test_NASA7_backward_coeff(NASA7_backward_coeff_setup):
+    """Test backward rxn rate coefficient using NASA
+    7 polynomial coefficients."""
+
+    # Test when changing value of R
     expected_nasa = numpy.array([[1,0,0,0,0,0,0],
                                 [1,0,0,0,0,0,0],
                                 [1,0,0,0,0,0,0]])
     k_f = 100
     nu_i = numpy.array([-2, -1, 2])
-    with pytest.raises(UserWarning):
-        kwd_coeff = NASA7BackwardCoeffs(nu_i, expected_nasa,
+    with pytest.warns(UserWarning):
+        kwd_coeff = NASA7BackwardCoeff(nu_i, expected_nasa,
                                         p0=1e5, R=43.3423)
 
-def test_backwardCoeff_gamma(test_backward_coeff):
-    """Tests value of gamma for working example."""
-    assert test_backward_coeff.gamma == -1
+    # Test value of gamma
+    assert NASA7_backward_coeff_setup.gamma == -1
 
-def test_backwardCoeff_computing_H(test_backward_coeff):
-    """Tests computing H/RT for working example."""
+    # Test computation of H/RT
     T = 100
     expected_H_over_RT = numpy.array([1, 1, 1])
-    assert numpy.isclose(test_backward_coeff.H_over_RT(T),
-                         expected_H_over_RT).all()
+    assert numpy.isclose(NASA7_backward_coeff_setup._H_over_RT(T),
+                         expected_H_over_RT, atol=1e-16).all()
 
-def test_backwardCoeff_computing_H_neg_T(test_backward_coeff):
-    """Tests computing H/RT for working example with neg T."""
+    # Test computation of H/RT with invalid T (non-positive temperature)
     T = -100
     with pytest.raises(ValueError):
-        test_backward_coeff.H_over_RT(T)
+        NASA7_backward_coeff_setup._H_over_RT(T)
 
-def test_backwardCoeff_computing_S(test_backward_coeff):
-    """Tests computing S/R for working example."""
+    # Test computation of S/R
     T = 100
     expected_S_over_R = numpy.array([4.60517, 4.60517, 4.60517])
-    assert numpy.isclose(test_backward_coeff.S_over_R(T),
-                         expected_S_over_R).all()
+    assert numpy.isclose(NASA7_backward_coeff_setup._S_over_R(T),
+                         expected_S_over_R, atol=1e-16).all()
 
-def test_backwardCoeff_computing_S_neg_T(test_backward_coeff):
-    """Tests computing S/R for working example with neg T."""
+    # Test computation of S/R with invalid T (non-positive temperature)
     T = -100
     with pytest.raises(ValueError):
-        test_backward_coeff.S_over_R(T)
+        NASA7_backward_coeff_setup._S_over_R(T)
 
-def test_backwardCoeff_computeCoeff(test_backward_coeff):
-    """Tests computing k_b for working example."""
+    # Test computation of backward rxn rate coefficient k_b
     T = 100
     k_f = 100
     expected_delta_S_over_R = -4.60517
     expected_delta_H_over_RT = -1
 
-    fact =  test_backward_coeff.p0 / test_backward_coeff.R / T
+    fact =  NASA7_backward_coeff_setup.p0 / NASA7_backward_coeff_setup.R / T
     expected_gamma = -1
     expected_ke = (fact ** expected_gamma) * (numpy.exp(expected_delta_S_over_R - 
                                                         expected_delta_H_over_RT))
 
     expected_kb_val = 442457 # 100 / 2.260104919e-6
-    assert numpy.isclose(test_backward_coeff.compute_backward_coeffs(k_f, T),
-                         expected_kb_val)
+    assert numpy.isclose(NASA7_backward_coeff_setup.compute_bkwd_coefficient(k_f, T),
+                         expected_kb_val, atol=1e-16)
 
-def test_backwardCoeff_computeCoeff_neg_T(test_backward_coeff):
-    """Tests computing k_b for working example with neg T."""
+    # Test computation of k_b with invalid T (non-positive temperature)
     T = -100
     k_f = 100
     with pytest.raises(ValueError):
-        test_backward_coeff.compute_backward_coeffs(k_f, T)
+        NASA7_backward_coeff_setup.compute_bkwd_coefficient(k_f, T)
