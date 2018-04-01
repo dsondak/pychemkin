@@ -133,7 +133,9 @@ class Scraper_9_coeffs:
         text_body = text_body.find('http:').find('http:')
 
         self.result = text_body.get_text()
-
+        f = open("9poly_scrapper_output.txt","w")
+        f.write(self.result)
+        f.close()
         return self.result
 
 if __name__ == "__main__":
