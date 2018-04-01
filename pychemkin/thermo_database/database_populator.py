@@ -47,7 +47,6 @@ class database_populator:
         species_info = {}
 
         #iterate over lines
-        miss = 0
         for line in lines:
             #spilt the line
             strings = line.split()
@@ -178,8 +177,8 @@ class database_populator:
         pd.set_option('display.max_columns', 100)
         pd.set_option('display.notebook_repr_html', True)
 
-        db = sqlite3.connect('NASA7_coeffs.sqlite')
-        self.cursor = db.cursor()
+        self.db = sqlite3.connect('NASA7_coeffs.sqlite')
+        self.cursor = self.db.cursor()
         self.cursor.execute("DROP TABLE IF EXISTS LOW")
         self.cursor.execute("DROP TABLE IF EXISTS HIGH")
         self.cursor.execute("PRAGMA foreign_keys=1")
@@ -216,7 +215,7 @@ class database_populator:
 
 
         # Commit changes to the database
-        db.commit()
+        self.db.commit()
     def species_xml_to_db(self):
         #create xml & db
         self.create_tables()
@@ -265,6 +264,6 @@ class database_populator:
                           (SPECIES_NAME, STATE, MOLEC_WEIGHT, TLOW, THIGH, COEFF_1, COEFF_2,COEFF_3,COEFF_4,COEFF_5,COEFF_6,COEFF_7)
                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', high_to_insert)
 
-        db.commit()
+        self.db.commit()
     def create_sql_db(self):
           self.species_xml_to_db()
