@@ -265,5 +265,6 @@ class database_populator:
                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', high_to_insert)
 
         self.db.commit()
+
     def create_sql_db(self):
           self.species_xml_to_db()
