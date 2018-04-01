@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import json
 
-class Parser_7_coeffs:
+class database_populator:
     """
     Parser for the 7-degree reaction coefficients from the BURCAT Database.
 
