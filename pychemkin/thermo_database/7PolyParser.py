@@ -139,7 +139,7 @@ class Parser_7_coeffs:
         reparsed = minidom.parseString(rough_string)
         return reparsed.toprettyxml(indent="  ")
 
-    def species_dict_to_xml(self):
+    def species_dict_to_xml(self,save_file = True):
 
         species_info = self.species_txt_to_dict()
 
@@ -178,9 +178,10 @@ class Parser_7_coeffs:
             root.append(specie)
 
         result = self.prettify(root)
-        f = open("7poly.xml","w")
-        f.write(result)
-        f.close()
+        if save_file:
+            f = open("7poly.xml","w")
+            f.write(result)
+            f.close()
 
         return result
 
