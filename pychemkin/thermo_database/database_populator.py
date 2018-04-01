@@ -38,7 +38,7 @@ class Parser_7_coeffs:
 
     def __init__(self,f='7poly_scrapper_output.txt'):
         self.txt_file = f
-        
+
     def species_txt_to_dict(self):
         #read the file
         file = open(self.txt_file,'r')
@@ -59,10 +59,9 @@ class Parser_7_coeffs:
             #find line with species
             if strings[-1] == '1':
                 #get species name
-                    
                 specie = strings[0]
                 specie_state = strings[1]
-<<<<<<< HEAD:pychemkin/thermo_database/database_populator.py
+
                 # get species molec weight
                 if strings[-3] in ['A','B','C','D','E','F','G']:
                     specie_weight = float(strings[-2][-8:])
@@ -74,31 +73,6 @@ class Parser_7_coeffs:
                         specie_weight = None
                     else:
                         specie_weight = float(strings[-2][-8:])
-=======
-                
-                # get species molec weight
-                
-                if strings[-3] in ['A','B','C','D','E','F','G']:
-                    specie_weight = float(strings[-2][-8:])
-                    #print(specie_weight)
-                else:
-                    
-                    if strings[-3] in ['6000.000','5000.000']:
-                        #print(strings[-2][-8:])
-                        specie_weight = float(strings[-2][-8:])
-                    elif strings[-3] in ['ROTATIONS','IA=9.4815']:
-                        specie_weight = None
-                        miss +=1
-                        #print('miss',miss)
-                        #print(50*"-")
-                    else:
-                        
-                        #print(strings[-3])
-                        #print(strings[-2][-8:])
-                        #print(50*"-")
-                        specie_weight = float(strings[-2][-8:])
-                        
->>>>>>> 7dd65193984118fd6bcaba5c7b34b35d35c27d89:pychemkin/thermo_database/7PolyParser.py
 
                 #get the low temp min and max
                 low_min = strings[-4]
@@ -143,11 +117,7 @@ class Parser_7_coeffs:
                 species_info[specie,specie_state,specie_weight]['high']['Tmax'] = high_max
                 species_info[specie,specie_state,specie_weight]['high']['Tmin'] = high_min
                 species_info[specie,specie_state,specie_weight]['high']['coeffs'] = high_coeffs
-<<<<<<< HEAD:pychemkin/thermo_database/database_populator.py
 
-=======
-                
->>>>>>> 7dd65193984118fd6bcaba5c7b34b35d35c27d89:pychemkin/thermo_database/7PolyParser.py
         return species_info
 
     def prettify(self, elem):
@@ -208,7 +178,7 @@ class Parser_7_coeffs:
         pd.set_option('display.max_columns', 100)
         pd.set_option('display.notebook_repr_html', True)
 
-        db = sqlite3.connect('7Poly.sqlite')
+        db = sqlite3.connect('NASA7_coeffs.sqlite')
         self.cursor = db.cursor()
         self.cursor.execute("DROP TABLE IF EXISTS LOW")
         self.cursor.execute("DROP TABLE IF EXISTS HIGH")
@@ -252,7 +222,7 @@ class Parser_7_coeffs:
         self.create_tables()
         self.species_dict_to_xml()
 
-        
+
         #Get the xml
         tree = ET.parse('7poly.xml')
         root = tree.getroot()
@@ -289,29 +259,12 @@ class Parser_7_coeffs:
 
             #Insert the values for each species into table
             self.cursor.execute('''INSERT INTO LOW
-                          (SPECIES_NAME, STATE,MOLEC_WEIGHT, TLOW, THIGH, COEFF_1, COEFF_2,COEFF_3,COEFF_4,COEFF_5,COEFF_6,COEFF_7, COEFF_8)
+                          (SPECIES_NAME, STATE, MOLEC_WEIGHT, TLOW, THIGH, COEFF_1, COEFF_2,COEFF_3,COEFF_4,COEFF_5,COEFF_6,COEFF_7, COEFF_8)
                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', lows_to_insert)
             self.cursor.execute('''INSERT INTO HIGH
-                          (SPECIES_NAME, STATE,MOLEC_WEIGHT, TLOW, THIGH, COEFF_1, COEFF_2,COEFF_3,COEFF_4,COEFF_5,COEFF_6,COEFF_7)
+                          (SPECIES_NAME, STATE, MOLEC_WEIGHT, TLOW, THIGH, COEFF_1, COEFF_2,COEFF_3,COEFF_4,COEFF_5,COEFF_6,COEFF_7)
                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', high_to_insert)
-<<<<<<< HEAD:pychemkin/thermo_database/database_populator.py
-=======
-
->>>>>>> 7dd65193984118fd6bcaba5c7b34b35d35c27d89:pychemkin/thermo_database/7PolyParser.py
 
         db.commit()
     def create_sql_db(self):
           self.species_xml_to_db()
-
-
-'''
-if __name__ == "__main__":
-    import doctest
-    from bs4 import BeautifulSoup
-    import requests
-    import numpy as np
-    import sys
-    import time
-    import json
-    doctest.testmod(verbose=True)
-'''
