@@ -18,8 +18,8 @@ class Test_Scrapers():
         """
         test7 = Scraper_7_coeffs()
         # The following method scrape_coeffs() implicitly calls scrape_url() and create_soup_object()
-        with pytest.warns(DeprecationWarning):
-            table = test7.scrape_coeffs()
+        #with pytest.warns(DeprecationWarning):
+        table = test7.scrape_coeffs()
         
         #Test that the server response to the parser was 200.
         assert str(test7.web_page.__repr__) == "<bound method Response.__repr__ of <Response [200]>>"
@@ -30,4 +30,20 @@ class Test_Scrapers():
         # Test isolation of table of interest by testing type and length
         
         assert type(table) == str and len(table)>1400000
+
+    @staticmethod
+    def test_Scraper_9():
+        """
+        Tests for Parser of 7-coeff NASA Polynomials
+        """
+        test9 = Scraper_7_coeffs()
+        # The following method scrape_coeffs() implicitly calls scrape_url() and create_soup_object()
+        #with pytest.warns(DeprecationWarning):
+        table = test9.scrape_coeffs()
+        
+        #Test that the server response to the parser was 200.
+        assert str(test9.web_page.__repr__) == "<bound method Response.__repr__ of <Response [200]>>"
+        
+        # Test soup object creation
+        assert str(test9.soup.__class__.__name__) == "BeautifulSoup"
               
