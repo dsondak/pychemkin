@@ -59,7 +59,14 @@ class database_populator:
             if strings[-1] == '1':
                 #get species name
                 specie = strings[0]
-                specie_state = strings[1]
+                #specie_state = strings[1]
+
+                #set the state if there is one
+                state_list = ['(solid)','(liquid)','(cr)','ion','g','anion']
+                if strings[1] in state_list:
+                    specie_state= strings[1]
+                else:
+                    specie_state = ""
 
                 # get species molec weight
                 if strings[-3] in ['A','B','C','D','E','F','G']:
