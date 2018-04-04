@@ -73,13 +73,31 @@ class database_populator:
                     else:
                         specie_weight = float(strings[-2][-8:])
 
-                #get the low temp min and max
-                low_min = strings[-4]
+                '''#get the low temp min and max
+                low_min = strings[-5]
                 low_max = 1000.000
 
                 #get the high temp min and max
                 high_min = 1000.000
-                high_max = strings[-3]
+                high_max = strings[-4]'''
+
+                #temperatures
+                low_max = 1000.000
+                high_min = 1000.000
+
+                # get temperatures depending on line
+                try:
+                    #if not a float number then go to next string in line
+                    float(strings[-5])
+                    low_min = strings[-5]
+                except ValueError:
+                    low_min = strings[-4]
+                try:
+                    #if not a float number then go to next string in line
+                    float(strings[-3])
+                    high_max = strings[-3]
+                except ValueError:
+                    high_max = strings[-4]
 
             if strings[-1] == '2':
                 #spilt the line by number as the numbers are not broken up by spaces in txt file
@@ -268,3 +286,6 @@ class database_populator:
 
     def create_sql_db(self):
           self.species_xml_to_db()
+
+x = database_populator()
+x.create_sql_db()
