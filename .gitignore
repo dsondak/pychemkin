@@ -102,3 +102,6 @@ ENV/
 
 #Some interim files
 /pychemkin/thermo_database/do_not_push
+
+# DS file
+.DS_Store
