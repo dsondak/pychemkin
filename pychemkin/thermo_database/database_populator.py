@@ -73,14 +73,6 @@ class database_populator:
                     else:
                         specie_weight = float(strings[-2][-8:])
 
-                '''#get the low temp min and max
-                low_min = strings[-5]
-                low_max = 1000.000
-
-                #get the high temp min and max
-                high_min = 1000.000
-                high_max = strings[-4]'''
-
                 #temperatures
                 low_max = 1000.000
                 high_min = 1000.000
