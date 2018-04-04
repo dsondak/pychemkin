@@ -278,6 +278,3 @@ class database_populator:
 
     def create_sql_db(self):
           self.species_xml_to_db()
-
-x = database_populator()
-x.create_sql_db()
