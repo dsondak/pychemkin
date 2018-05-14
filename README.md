@@ -1,7 +1,7 @@
 # pychemkin
 
 [![Build Status](https://travis-ci.org/dsondak/pychemkin.svg?branch=database)](https://travis-ci.org/dsondak/pychemkin.svg?branch=database)
-[![Coverage Status](https://coveralls.io/repos/github/dsondak/pychemkin/badge.svg?branch=database)](https://coveralls.io/github/dsondak/pychemkin?branch=database)
+[![Coverage Status](https://coveralls.io/repos/github/dsondak/pychemkin/badge.svg?branch=database&service=github)](https://coveralls.io/github/dsondak/pychemkin?branch=database)
 
 image:: https://coveralls.io/repos/github/dsondak/pychemkin/badge.svg?branch=database&service=github
 
