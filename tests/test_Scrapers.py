@@ -36,7 +36,7 @@ class Test_Scrapers():
         """
         Tests for Parser of 7-coeff NASA Polynomials
         """
-        test9 = Scraper_7_coeffs()
+        test9 = Scraper_9_coeffs()
         # The following method scrape_coeffs() implicitly calls scrape_url() and create_soup_object()
         #with pytest.warns(DeprecationWarning):
         table = test9.scrape_coeffs()
