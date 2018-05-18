@@ -102,7 +102,7 @@ class ReactionSystem:
         NASA = {}
         for specie in NASA_poly_coeff:
             specie_dict = NASA_poly_coeff[specie]
-            if self.temperature <= specie_dict["Tmid"]: # get the low temperature
+            if self.temperature <= numpy.float(specie_dict["Tmid"]): # get the low temperature
                 NASA[specie] = specie_dict["low"]
             else:
                 NASA[specie] = specie_dict["high"]

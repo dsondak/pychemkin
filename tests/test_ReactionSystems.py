@@ -2,6 +2,7 @@
 """Test module for reaction systems"""
 import os, sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import numpy
 import os
 import pytest
@@ -24,6 +25,7 @@ def test_lowT_rxn_sys():
     species = xml_parser.get_species()
 
     sql_parser = SQLParser(TEST_DB_PATH, species)
+    print(sql_parser)
     thermo_coeffs = sql_parser.get_thermo_coeffs()
 
     temp = 500 # "low" temperature range in NASA coeffs database
@@ -61,34 +63,34 @@ def test_rev_rxn_sys():
     return rxnsys
 
 # FIRST ERROR: string vs int!!
-# def test_rxn_system_functionalities(test_lowT_rxn_sys):
-#     """Test functions in reaction system at low T."""
+def test_rxn_system_functionalities(test_lowT_rxn_sys):
+    """Test functions in reaction system at low T."""
     
-#     # Test sort_reaction_rates() routine
-#     rates = test_lowT_rxn_sys.sort_reaction_rates()
-#     assert rates['H'] == -30.
-#     assert rates['O2'] == -15.
-#     assert rates['H2O'] == 30.
+    # Test sort_reaction_rates() routine
+    rates = test_lowT_rxn_sys.sort_reaction_rates()
+    assert rates['H'] == -30.
+    assert rates['O2'] == -15.
+    assert rates['H2O'] == 30.
 
-#     # Test fetching of low temperature NASA matrix
-#     expected_lowT_nasa = {'H': numpy.array([2.50000000e+00, 0.00000000e+00,
-#                                       0.00000000e+00, 0.00000000e+00,
-#                                       0.00000000e+00, 2.54716270e+04,
-#                                       -4.60117608e-01]),
-#                     'H2O': numpy.array([ 3.38684249e+00, 3.47498246e-03,
-#                                        -6.35469633e-06, 6.96858127e-09,
-#                                        -2.50658847e-12, -3.02081133e+04,
-#                                        2.59023285e+00]),
-#                     'O2': numpy.array([3.21293640e+00, 1.12748635e-03,
-#                                       -5.75615047e-07, 1.31387723e-09,
-#                                       -8.76855392e-13, -1.00524902e+03,
-#                                       6.03473759e+00])}
-#     assert (numpy.isclose(test_lowT_rxn_sys.NASA_matrix['H2O'],
-#                           expected_lowT_nasa['H2O'], atol=1e-16)).all()
-#     assert (numpy.isclose(test_lowT_rxn_sys.NASA_matrix['O2'],
-#                           expected_lowT_nasa['O2'], atol=1e-16)).all()
-#     assert (numpy.isclose(test_lowT_rxn_sys.NASA_matrix['H'],
-#                           expected_lowT_nasa['H'], atol=1e-16)).all()
+    # Test fetching of low temperature NASA matrix
+    expected_lowT_nasa = {'H': numpy.array([2.50000000e+00, 0.00000000e+00,
+                                      0.00000000e+00, 0.00000000e+00,
+                                      0.00000000e+00, 2.54716270e+04,
+                                      -4.60117608e-01]),
+                    'H2O': numpy.array([ 3.38684249e+00, 3.47498246e-03,
+                                       -6.35469633e-06, 6.96858127e-09,
+                                       -2.50658847e-12, -3.02081133e+04,
+                                       2.59023285e+00]),
+                    'O2': numpy.array([3.21293640e+00, 1.12748635e-03,
+                                      -5.75615047e-07, 1.31387723e-09,
+                                      -8.76855392e-13, -1.00524902e+03,
+                                      6.03473759e+00])}
+    assert (numpy.isclose(test_lowT_rxn_sys.NASA_matrix['H2O'],
+                          expected_lowT_nasa['H2O'], atol=1e-16)).all()
+    assert (numpy.isclose(test_lowT_rxn_sys.NASA_matrix['O2'],
+                          expected_lowT_nasa['O2'], atol=1e-16)).all()
+    assert (numpy.isclose(test_lowT_rxn_sys.NASA_matrix['H'],
+                          expected_lowT_nasa['H'], atol=1e-16)).all()
 
 
 # # Second Error - string vs int!!
@@ -354,3 +356,5 @@ def test_rev_rxn_sys():
 #     assert numpy.isclose(rates['O2'], -2.1311825395902986e+12, atol=1e-16)
 #     assert numpy.isclose(rates['HO2'], -1.3354030759186477e+13, atol=1e-16)
 #     assert numpy.isclose(rates['H2O2'], -3.3194581881849854e+11, atol=1e-16)
+
+
