@@ -418,7 +418,7 @@ class NASA7BackwardCoeff(BackwardReactionCoeff):
         if T <= 0:
             raise ValueError("Temperature has to be a positive value!")
 
-        a = self.nasa7_coeffs
+        a = numpy.longdouble(self.nasa7_coeffs)
         H_RT = (a[:, 0] + (0.5 * a[:, 1] * T) + (a[:, 2] * T ** 2.0) / 3.0
                 + (a[:, 3] * T ** 3.0) / 4.0 + (a[:, 4] * T ** 4.0) / 5.0
                 + a[:, 5] / T)
@@ -446,7 +446,7 @@ class NASA7BackwardCoeff(BackwardReactionCoeff):
         if T <= 0:
             raise ValueError("Temperature has to be a positive value!")
 
-        a = self.nasa7_coeffs
+        a = numpy.longdouble(self.nasa7_coeffs)
         S_R = (a[:, 0] * numpy.log(T) + a[:, 1] * T + (a[:, 2] * T ** 2.0) / 2.0
                + (a[:, 3] * T ** 3.0) / 3.0 + (a[:, 4] * T ** 4.0) / 4.0 + a[:, 6])
         return S_R
