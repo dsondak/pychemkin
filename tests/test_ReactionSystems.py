@@ -71,26 +71,27 @@ def test_rxn_system_functionalities(test_lowT_rxn_sys):
     assert rates['H'] == -30.
     assert rates['O2'] == -15.
     assert rates['H2O'] == 30.
-
+  
     # Test fetching of low temperature NASA matrix
     expected_lowT_nasa = {'H': numpy.array([2.50000000e+00, 0.00000000e+00,
                                       0.00000000e+00, 0.00000000e+00,
-                                      0.00000000e+00, 2.54716270e+04,
-                                      -4.60117608e-01]),
-                    'H2O': numpy.array([ 3.38684249e+00, 3.47498246e-03,
-                                       -6.35469633e-06, 6.96858127e-09,
-                                       -2.50658847e-12, -3.02081133e+04,
-                                       2.59023285e+00]),
-                    'O2': numpy.array([3.21293640e+00, 1.12748635e-03,
-                                      -5.75615047e-07, 1.31387723e-09,
-                                      -8.76855392e-13, -1.00524902e+03,
-                                      6.03473759e+00])}
-    assert (numpy.isclose(test_lowT_rxn_sys.NASA_matrix['H2O'],
-                          expected_lowT_nasa['H2O'], atol=1e-16)).all()
-    assert (numpy.isclose(test_lowT_rxn_sys.NASA_matrix['O2'],
-                          expected_lowT_nasa['O2'], atol=1e-16)).all()
-    assert (numpy.isclose(test_lowT_rxn_sys.NASA_matrix['H'],
+                                      0.00000000e+00, 0.25473660E+05,
+                                      -0.44668285E+00]),
+                    'H2O': numpy.array([ 0.41986352E+01, -0.20364017E-02,
+                                       0.65203416E-05, -0.54879269E-08,
+                                       0.17719680E-11, -0.30293726E+05,
+                                       -0.84900901E+00]),
+                    'O2': numpy.array([3.78535371E+00, -3.21928540E-03,
+                                      1.12323443E-05, -1.17254068E-08,
+                                      4.17659585E-12, 1.02922572E+04,
+                                      3.27320239E+00])}
+    assert (numpy.isclose(numpy.longdouble(test_lowT_rxn_sys.NASA_matrix['H']),
                           expected_lowT_nasa['H'], atol=1e-16)).all()
+    assert (numpy.isclose(numpy.longdouble(test_lowT_rxn_sys.NASA_matrix['H2O']),
+                          expected_lowT_nasa['H2O'], atol=1e-16)).all()
+    assert (numpy.isclose(numpy.longdouble(test_lowT_rxn_sys.NASA_matrix['O2']),
+                          expected_lowT_nasa['O2'], atol=1e-16)).all()
+    
 
 
 # # Second Error - string vs int!!
