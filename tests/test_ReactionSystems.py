@@ -94,29 +94,29 @@ def test_rxn_system_functionalities(test_lowT_rxn_sys):
     
 
 
-# # Second Error - string vs int!!
-# def test_highT_rxn_system_functionaltiies(test_highT_rxn_sys):
-#     """Test functions in reaction system at high T."""
+# Second Error - string vs int!!
+def test_highT_rxn_system_functionaltiies(test_highT_rxn_sys):
+    """Test functions in reaction system at high T."""
 
-#     # Test fetching of high temperature NASA matrix
-#     expected_highT_nasa = ({'O2': numpy.array([3.69757819e+00, 6.13519689e-04,
-#                                               -1.25884199e-07, 1.77528148e-11,
-#                                               -1.13643531e-15, -1.23393018e+03,
-#                                               3.18916559e+00]),
-#                            'H2O': numpy.array([2.67214561e+00, 3.05629289e-03,
-#                                               -8.73026011e-07, 1.20099639e-10,
-#                                               -6.39161787e-15, -2.98992090e+04,
-#                                               6.86281681e+00]),
-#                            'H': numpy.array([2.50000000e+00, 0.00000000e+00,
-#                                             0.00000000e+00, 0.00000000e+00,
-#                                             0.00000000e+00, 2.54716270e+04,
-#                                             -4.60117638e-01])})
-#     assert (numpy.isclose(test_highT_rxn_sys.NASA_matrix['H2O'],
-#                           expected_highT_nasa['H2O'], atol=1e-16)).all()
-#     assert (numpy.isclose(test_highT_rxn_sys.NASA_matrix['O2'],
-#                           expected_highT_nasa['O2'], atol=1e-16)).all()
-#     assert (numpy.isclose(test_highT_rxn_sys.NASA_matrix['H'], 
-#                           expected_highT_nasa['H'], atol=1e-16)).all()
+    # Test fetching of high temperature NASA matrix
+    expected_highT_nasa = ({'O2': numpy.array([3.45852381E+00, 1.04045351E-03,
+                                              -2.79664041E-07, 3.11439672E-11,
+                                              -8.55656058E-16, 1.02229063E+04,
+                                              4.15264119E+00]),
+                           'H2O': numpy.array([0.26770389E+01, 0.29731816E-02,
+                                              -0.77376889E-06, 0.94433514E-10,
+                                              -0.42689991E-14, -0.29885894E+05,
+                                              0.68825500E+01]),
+                           'H': numpy.array([2.50000000e+00, 0.00000000e+00,
+                                            0.00000000e+00, 0.00000000e+00,
+                                            0.00000000e+00, 0.25473660E+05,
+                                            -0.44668285E+00])})
+    assert (numpy.isclose(numpy.longdouble(test_highT_rxn_sys.NASA_matrix['O2']),
+                          expected_highT_nasa['O2'], atol=1e-16)).all()
+    assert (numpy.isclose(numpy.longdouble(test_highT_rxn_sys.NASA_matrix['H2O']),
+                          expected_highT_nasa['H2O'], atol=1e-16)).all()
+    assert (numpy.isclose(numpy.longdouble(test_highT_rxn_sys.NASA_matrix['H']), 
+                          expected_highT_nasa['H'], atol=1e-16)).all()
 
 # def test_rxn_sys_invalid_temperature():
 #     """Tests setting up reaction system with invalid temperatures."""
