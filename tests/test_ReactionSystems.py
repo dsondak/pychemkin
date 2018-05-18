@@ -118,22 +118,22 @@ def test_highT_rxn_system_functionaltiies(test_highT_rxn_sys):
     assert (numpy.isclose(numpy.longdouble(test_highT_rxn_sys.NASA_matrix['H']), 
                           expected_highT_nasa['H'], atol=1e-16)).all()
 
-# def test_rxn_sys_invalid_temperature():
-#     """Tests setting up reaction system with invalid temperatures."""
-#     xml_filename =  "tests/test_xml_files/rxns_mixed.xml"
-#     xml_parser = XMLParser(xml_filename)
-#     species = xml_parser.get_species()
-#     sql_parser = SQLParser(TEST_DB_PATH, species)
-#     thermo_coeffs = sql_parser.get_thermo_coeffs()
-#     concentrations = {'H':1, 'O2':2, 'OH':1, 'O':4, 'H2O':0, 'H2':1}
+def test_rxn_sys_invalid_temperature():
+    """Tests setting up reaction system with invalid temperatures."""
+    xml_filename =  "tests/test_xml_files/rxns_mixed.xml"
+    xml_parser = XMLParser(xml_filename)
+    species = xml_parser.get_species()
+    sql_parser = SQLParser(TEST_DB_PATH, species)
+    thermo_coeffs = sql_parser.get_thermo_coeffs()
+    concentrations = {'H':1, 'O2':2, 'OH':1, 'O':4, 'H2O':0, 'H2':1}
     
-#     temp = 0
-#     with pytest.raises(ValueError):
-#         rxnsys = ReactionSystem(xml_parser.reaction_list, thermo_coeffs, temp, concentrations)
+    temp = 0
+    with pytest.raises(ValueError):
+        rxnsys = ReactionSystem(xml_parser.reaction_list, thermo_coeffs, temp, concentrations)
     
-#     temp = -100
-#     with pytest.raises(ValueError):
-#         rxnsys = ReactionSystem(xml_parser.reaction_list, thermo_coeffs, temp, concentrations)
+    temp = -100
+    with pytest.raises(ValueError):
+        rxnsys = ReactionSystem(xml_parser.reaction_list, thermo_coeffs, temp, concentrations)
 
 # def test_rxn_sys_get_reaction_rate_for_3_rxns():
 #     """Tests function to get reaction rate for a given system of reactions (more than 1 reaction)."""
