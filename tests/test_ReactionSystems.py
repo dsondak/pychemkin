@@ -135,42 +135,46 @@ def test_rxn_sys_invalid_temperature():
     with pytest.raises(ValueError):
         rxnsys = ReactionSystem(xml_parser.reaction_list, thermo_coeffs, temp, concentrations)
 
-# def test_rxn_sys_get_reaction_rate_for_3_rxns():
-#     """Tests function to get reaction rate for a given system of reactions (more than 1 reaction)."""
-#     xml_filename =  "tests/test_xml_files/rxnsys.xml"
-#     xml_parser = XMLParser(xml_filename)
-#     species = xml_parser.get_species()
-#     sql_parser = SQLParser(TEST_DB_PATH, species)
-#     thermo_coeffs = sql_parser.get_thermo_coeffs()
-#     temp = 10
-#     concentrations = {'H':1, 'O2':1, 'OH':1, 'O':1, 'H2O':1, 'H2':1}
-#     rxnsys = ReactionSystem(xml_parser.reaction_list, thermo_coeffs, temp, concentrations)
-#     rates = rxnsys.sort_reaction_rates()
-#     assert rates['H'] == -10.
-#     assert rates['O2'] == -15.
-#     assert rates['H2O'] == 40.
-#     assert rates['H2'] == -20.
-#     assert rates['O'] == -10.
-#     assert rates['OH'] == 0.
+def test_rxn_sys_get_reaction_rate_for_3_rxns():
+    """Tests function to get reaction rate for a given system of reactions (more than 1 reaction)."""
+    xml_filename =  "tests/test_xml_files/rxnsys.xml"
+    xml_parser = XMLParser(xml_filename)
+    species = xml_parser.get_species()
+    sql_parser = SQLParser(TEST_DB_PATH, species)
+    thermo_coeffs = sql_parser.get_thermo_coeffs()
+    temp = 10
+    concentrations = {'H':1, 'O2':1, 'OH':1, 'O':1, 'H2O':1, 'H2':1}
+    rxnsys = ReactionSystem(xml_parser.reaction_list, thermo_coeffs, temp, concentrations)
+    rates = rxnsys.sort_reaction_rates()
+    assert rates['H'] == -10.
+    assert rates['O2'] == -15.
+    assert rates['H2O'] == 40.
+    assert rates['H2'] == -20.
+    assert rates['O'] == -10.
+    assert rates['OH'] == 0.
 
-# def test_rxn_sys_rev_reaction(test_rev_rxn_sys):
-#     """Tests setting up reaction system with reversible reaction."""
-#     expected_nasa = {'O2': numpy.array([3.21293640e+00, 1.12748635e-03,
-#                                        -5.75615047e-07, 1.31387723e-09,
-#                                        -8.76855392e-13, -1.00524902e+03,
-#                                        6.03473759e+00]),
-#                     'H2O': numpy.array([3.38684249e+00, 3.47498246e-03,
-#                                        -6.35469633e-06, 6.96858127e-09,
-#                                        -2.50658847e-12, -3.02081133e+04,
-#                                        2.59023285e+00]),
-#                     'H': numpy.array([2.50000000e+00, 0.00000000e+00,
-#                                      0.00000000e+00, 0.00000000e+00,
-#                                      0.00000000e+00, 2.54716270e+04,
-#                                      -4.60117608e-01])}
-#     rev_rxn_obj = test_rev_rxn_sys.reaction_list[0]
-#     assert (numpy.isclose(rev_rxn_obj.NASA_poly_coefs_dict['H2O'], expected_nasa['H2O'])).all()
-#     assert (numpy.isclose(rev_rxn_obj.NASA_poly_coefs_dict['O2'], expected_nasa['O2'])).all()
-#     assert (numpy.isclose(rev_rxn_obj.NASA_poly_coefs_dict['H'], expected_nasa['H'])).all()
+
+
+
+def test_rxn_sys_rev_reaction(test_rev_rxn_sys):
+    """Tests setting up reaction system with reversible reaction."""
+
+    expected_nasa = {'H': numpy.array([2.50000000e+00, 0.00000000e+00,
+                                      0.00000000e+00, 0.00000000e+00,
+                                      0.00000000e+00, 0.25473660E+05,
+                                      -0.44668285E+00]),
+                    'H2O': numpy.array([ 0.41986352E+01, -0.20364017E-02,
+                                       0.65203416E-05, -0.54879269E-08,
+                                       0.17719680E-11, -0.30293726E+05,
+                                       -0.84900901E+00]),
+                    'O2': numpy.array([3.78535371E+00, -3.21928540E-03,
+                                      1.12323443E-05, -1.17254068E-08,
+                                      4.17659585E-12, 1.02922572E+04,
+                                      3.27320239E+00])}
+    rev_rxn_obj = test_rev_rxn_sys.reaction_list[0]
+    assert (numpy.isclose(numpy.longdouble(rev_rxn_obj.NASA_poly_coefs_dict['H2O']), expected_nasa['H2O'])).all()
+    assert (numpy.isclose(numpy.longdouble(rev_rxn_obj.NASA_poly_coefs_dict['O2']), expected_nasa['O2'])).all()
+    assert (numpy.isclose(numpy.longdouble(rev_rxn_obj.NASA_poly_coefs_dict['H']), expected_nasa['H'])).all()
 
 # def test_rxn_sys_irrev_reaction_antioch():
 #     """Test against Antioch irrev rxn results"""
