@@ -297,26 +297,26 @@ def test_rxn_sys_rev_reaction_antioch():
     assert numpy.isclose(rates['HO2'], 1.4231412404922757e+06, atol=1e-16)
     assert numpy.isclose(rates['H2O2'], 0.0000000000000000e+00, atol=1e-16)
 
-    # # Condition #2
-    # temp = 2500.0000000000000000
-    # concentrations = ({'H': 5.0000000000000000e-01,
-    #                   'O': 1.0000000000000001e-01,
-    #                   'OH': 1.0000000000000000e-02,
-    #                   'H2': 2.0000000000000000e+00,
-    #                   'H2O': 2.5000000000000000e-01,
-    #                   'O2': 1.0000000000000000e+00,
-    #                   'HO2': 2.9999999999999999e-01,
-    #                   'H2O2': 2.0000000000000000e-02})
-    # rxnsys = ReactionSystem(xml_parser.reaction_list, thermo_coeffs, temp, concentrations)
-    # rates = rxnsys.sort_reaction_rates()
-    # assert numpy.isclose(rates['H'], -3.7739607416516375e+13, atol=1e-16)
-    # assert numpy.isclose(rates['O'], 2.3087395959996922e+13, atol=1e-16)
-    # assert numpy.isclose(rates['OH'], 6.4832447404435727e+13, atol=1e-16)
-    # assert numpy.isclose(rates['H2'], -6.1109243594152285e+12, atol=1e-16)
-    # assert numpy.isclose(rates['H2O'], -2.1877981256944708e+11, atol=1e-16)
-    # assert numpy.isclose(rates['O2'], -2.9727063574790047e+13, atol=1e-16)
-    # assert numpy.isclose(rates['HO2'], -1.3813504758333098e+13, atol=1e-16)
-    # assert numpy.isclose(rates['H2O2'], -3.0996344280845251e+11, atol=1e-16)
+    # Condition #2
+    temp = 2500.0000000000000000
+    concentrations = ({'H': 5.0000000000000000e-01,
+                      'O': 0.0000000000000000e+00,
+                      'OH': 0.0000000000000000e+00,
+                      'H2': 2.0000000000000000e+00,
+                      'H2O': 0.0000000000000000e+00,
+                      'O2': 1.0000000000000000e+00,
+                      'HO2': 0.0000000000000000e+00,
+                      'H2O2': 0.0000000000000000e+00})
+    rxnsys = ReactionSystem(xml_parser.reaction_list, thermo_coeffs, temp, concentrations)
+    rates = rxnsys.sort_reaction_rates()
+    assert numpy.isclose(rates['H'], -3.3100422956557074e+13, atol=1e-16)
+    assert numpy.isclose(rates['O'], 3.3300992971255586e+13, atol=1e-16)
+    assert numpy.isclose(rates['OH'], 3.3300992971255586e+13, atol=1e-16)
+    assert numpy.isclose(rates['H2'], -2.0057001469851071e+11, atol=1e-16)
+    assert numpy.isclose(rates['H2O'], 0.0000000000000000e+00, atol=1e-16)
+    assert numpy.isclose(rates['O2'], -3.3501562985954098e+13, atol=1e-16)
+    assert numpy.isclose(rates['HO2'], 2.0057001469851071e+11, atol=1e-16)
+    assert numpy.isclose(rates['H2O2'], 0.0000000000000000e+00, atol=1e-16)
 
     # # Condition #3
     # temp = 950.0000000000000000
