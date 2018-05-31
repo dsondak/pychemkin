@@ -54,6 +54,7 @@ def test_invalid_or_extra_components():
     T = 10
     with pytest.warns(UserWarning):
         k_test = ArrheniusFwdCoeff(k_parameters, T).k
+<<<<<<< HEAD
 
     k_parameters = {'A': 10**7, 'E':10**3, 'madeup':120}
     T = 10
@@ -74,16 +75,47 @@ def test_invalid_or_extra_components():
 def test_constant_rxn_rate_coefficient():
     """Tests for constant reaction rate coefficient."""
 
+=======
+
+    k_parameters = {'A': 10**7, 'E':10**3, 'madeup':120}
+    T = 10
+    with pytest.warns(UserWarning):
+        k_test = ArrheniusFwdCoeff(k_parameters, T).k
+
+    # modified Arrhenius
+    k_parameters = {'A': 10**7, 'E':10**3, 'b':0.5, 'madeup':120, 'R': 8.3144598}
+    T = 10
+    with pytest.warns(UserWarning):
+        k_test = ModifiedArrheniusFwdCoeff(k_parameters, T).k
+
+    k_parameters = {'A': 10**7, 'E':10**3, 'b':0.5, 'madeup':120}
+    T = 10
+    with pytest.warns(UserWarning):
+        k_test = ModifiedArrheniusFwdCoeff(k_parameters, T).k
+
+def test_constant_rxn_rate_coefficient():
+    """Tests for constant reaction rate coefficient."""
+
+>>>>>>> origin/develop
     # Test when invalid constant (non-positive k)
     k_parameters = {'k': -10}
     with pytest.raises(ValueError):
         k_test = ConstantFwdCoeff(k_parameters).k
+<<<<<<< HEAD
 
     # Compute with valid input
     k_parameters = {'k': 10}
     k_test = ConstantFwdCoeff(k_parameters).k
     assert k_test == 10
 
+=======
+
+    # Compute with valid input
+    k_parameters = {'k': 10}
+    k_test = ConstantFwdCoeff(k_parameters).k
+    assert k_test == 10
+
+>>>>>>> origin/develop
     # Test when T entered (no effect)
     k_parameters = {'k': 10}
     T = 10

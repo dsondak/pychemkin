@@ -1,11 +1,23 @@
+<<<<<<< HEAD
+=======
+
+"""Test module for reactions."""
+
+>>>>>>> origin/develop
 import numpy
 
 import warnings
+warnings.simplefilter("error")
 
 import pytest
 from pychemkin.reactions.Reactions import *
+<<<<<<< HEAD
 
 
+=======
+
+
+>>>>>>> origin/develop
 # ===== Tests for base elementary reactions ===== #
 
 @pytest.fixture
@@ -68,6 +80,19 @@ def test_Reaction_set_invalid_temperatures(test_base_reaction):
     # Absolute zero
     with pytest.raises(ValueError):
         test_base_reaction.set_temperature(0)
+<<<<<<< HEAD
+
+    # Negative temperature
+    with pytest.raises(ValueError):
+        test_base_reaction.set_temperature(-100)
+
+def test_Reaction_set_invalid_concentrations(test_base_reaction):
+    """Test when trying to set invalid concentrations."""
+
+    # Unrecognized species (CH4)
+    with pytest.raises(KeyError):
+        test_base_reaction.set_concentrations({'H2':1, 'CH4':2, 'H2O':3, 'H':4})
+=======
 
     # Negative temperature
     with pytest.raises(ValueError):
@@ -83,8 +108,16 @@ def test_Reaction_set_invalid_concentrations(test_base_reaction):
     # Negative concentration values
     with pytest.raises(ValueError):
         test_base_reaction.set_concentrations({'H2':1, 'OH':2, 'H2O':3, 'H':-4})
+>>>>>>> origin/develop
 
+    # Negative concentration values
+    with pytest.raises(ValueError):
+        test_base_reaction.set_concentrations({'H2':1, 'OH':2, 'H2O':3, 'H':-4})
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> origin/develop
 # ===== Tests for irreversible elementary reactions ===== #
 
 @pytest.fixture
@@ -290,4 +323,7 @@ def test_rev_elem_reaction_functions(test_rev_reaction):
     test_rev_reaction.set_concentrations(X={'H':1, 'O2':1, 'H2O':1})
     prog_rate = test_rev_reaction.compute_progress_rate(T=T)
     assert prog_rate == 10
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/develop
