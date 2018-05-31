@@ -106,3 +106,6 @@ ENV/
 
 # DS file
 .DS_Store
+
+# Pytest 
+.pytest_cache/
